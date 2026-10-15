@@ -155,6 +155,10 @@
     if (state.currentTime > end) {
       state.currentTime = end;
     }
+    // Keep the transport controls in sync whenever clips are added, moved, or removed.
+    updatePlayPauseButton();
+    updateTimeDisplay();
+    updateSeekSlider();
   }
 
   function markDirty() {
@@ -930,36 +934,41 @@
   }
 
   function renderAllClips() {
-    for (const type of TRACK_TYPES) {
-      const track = getTrackElement(type);
-      if (!track) continue;
-      const trackState = state.tracks[type];
-      if (!trackState || !trackState.exists) {
-        // Restore the track shell if it was removed but is needed again
-        if (trackTemplates[type] && state.clips.some((c) => c.trackType === type)) {
-          const frag = document.createElement('table');
-          frag.innerHTML = `<tr><td>${trackTemplates[type]}</td></tr>`;
-          const restored = frag.firstChild.firstChild.firstChild;
-          if (el.timelineTracks && !byId(`track-${type}`)) {
-            el.timelineTracks.appendChild(restored);
+    for (const [trackId, trackState] of Object.entries(state.tracks)) {
+      if (!trackState || !trackState.exists) continue;
+      let live = getTrackElement(trackId);
+
+      // Recreate missing track DOM from the base track template, including secondary tracks.
+      if (!live && el.timelineTracks) {
+        const baseType = getTrackBaseType(trackId);
+        const template = trackTemplates[baseType];
+        if (template) {
+          const holder = document.createElement('div');
+          holder.innerHTML = template.trim();
+          live = holder.firstElementChild;
+          if (live) {
+            live.id = `track-${trackId}`;
+            live.dataset.trackType = trackId;
+            const nameNode = live.querySelector('.track-name');
+            if (nameNode) nameNode.textContent = trackState.name || trackId;
+            el.timelineTracks.appendChild(live);
+            initTrackControlsForType(trackId);
           }
         }
       }
-      const live = getTrackElement(type);
       if (!live) continue;
-      live.style.display = trackState && trackState.hidden ? 'none' : '';
-      live.style.opacity = trackState && !trackState.hidden && trackState.muted ? '' : '';
 
+      live.style.display = trackState.hidden ? 'none' : '';
+      live.style.opacity = '';
       const content = live.querySelector('.track-content');
       if (!content) continue;
-      content.querySelectorAll('.clip').forEach((n) => n.remove());
+      content.querySelectorAll('.clip').forEach((node) => node.remove());
 
-      const laneClips = state.clips.filter((c) => c.trackType === type);
+      const laneClips = state.clips.filter((clip) => clip.trackType === trackId);
       const pps = pxPerSecond();
       const needed = contentOffsetX() + state.timelineDuration * pps + 400;
       content.style.width = `${Math.max(needed, 100)}px`;
       content.style.minHeight = 'var(--track-h)';
-
       for (const clip of laneClips) {
         content.appendChild(buildClipElement(clip));
       }
@@ -967,6 +976,7 @@
     renderRuler();
     updateTimelineEmptyState();
     updateClipPlayheadPosition();
+    updatePlayPauseButton();
   }
 
   function buildClipElement(clip) {
@@ -1373,9 +1383,11 @@
   }
 
   function activeHumanClipAt(trackType, t) {
-    // like activeClipAt but ignores hidden flag (used for processing state)
+    // Resolve the active clip only on an existing, visible track.
     for (const c of state.clips) {
       if (c.trackType !== trackType) continue;
+      const track = state.tracks[trackType];
+      if (track && (!track.exists || track.hidden)) continue;
       if (t >= c.start && t < c.start + c.duration) return c;
     }
     return null;
@@ -1564,7 +1576,7 @@
     }
 
     // Reconcile DOM: rebuild only when the active set changes
-    const sig = wanted.map((c) => `${c.id}:${Math.round((t - c.start) * 4)}`).join('|');
+    const sig = wanted.map((c) => `${c.id}:${Math.round((t - c.start) * 30)}`).join('|');
     if (el.previewOverlay.dataset.sig === sig) return;
     el.previewOverlay.dataset.sig = sig;
     el.previewOverlay.innerHTML = '';
@@ -2626,7 +2638,9 @@
         && data.clips.every((c) => {
           if (!c || typeof c.id !== 'string' || typeof c.start !== 'number' || typeof c.duration !== 'number') return false;
           if (!isFinite(c.start) || !isFinite(c.duration) || c.start < 0 || c.duration <= 0) return false;
-          if (c.trackType && !TRACK_TYPES.includes(c.trackType)) return false;
+          if (c.trackType && !/^(video|overlay|text|audio)(-\\d+)?$/.test(c.trackType)) return false;
+          if (c.trackType && data.tracks && !Object.prototype.hasOwnProperty.call(data.tracks, c.trackType)
+            && !TRACK_TYPES.includes(c.trackType)) return false;
           return true;
         })
         && (data.assets.every((a) => a && typeof a.name === 'string' && ['video', 'audio', 'image'].includes(a.type)));
@@ -2662,7 +2676,7 @@
       assetId: c.assetId || null,
       name: c.name || 'Clip',
       type: c.type || 'video',
-      trackType: TRACK_TYPES.includes(c.trackType) ? c.trackType : 'video',
+      trackType: (c.trackType && state.tracks[c.trackType]) ? c.trackType : (TRACK_TYPES.includes(c.trackType) ? c.trackType : 'video'),
       start: Math.max(0, c.start || 0),
       inPoint: Math.max(0, c.inPoint || 0),
       duration: Math.max(MIN_CLIP_DURATION, c.duration || MIN_CLIP_DURATION),
@@ -2673,12 +2687,18 @@
       const asset = assetById(clip.assetId);
       clip.missing = !asset || !!asset.missing;
     }
-    state.tracks = Object.assign(state.tracks, data.tracks || {});
+    const baseTracks = {};
     for (const type of TRACK_TYPES) {
-      if (!state.tracks[type]) {
-        state.tracks[type] = { type, name: type, hidden: false, muted: false, locked: false, exists: true };
-      }
-      state.tracks[type].exists = true; // restore shells below
+      baseTracks[type] = { type, name: type, hidden: false, muted: false, locked: false, exists: true };
+    }
+    state.tracks = Object.assign(baseTracks, data.tracks || {});
+    for (const [trackId, track] of Object.entries(state.tracks)) {
+      track.type = track.type || getTrackBaseType(trackId);
+      track.name = track.name || trackId;
+      track.hidden = !!track.hidden;
+      track.muted = !!track.muted;
+      track.locked = !!track.locked;
+      track.exists = track.exists !== false;
     }
     state.projectName = data.name;
     state.aspect = data.aspect || '16:9';
@@ -2963,7 +2983,10 @@
     
     const progress = makeProgressToast('Exporting 0%');
     state.currentTime = 0;
+    state.playing = true;
+    updatePlayPauseButton();
     updateClipPlayheadPosition();
+    syncPlaybackToPlayhead();
     
     recorder.onstop = () => {
       try {
