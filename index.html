@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CUTORA — Video Editor</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="app.js"></script>
+</head>
+<body>
+
+  <!-- ===================== TOP TOOLBAR ===================== -->
+  <header id="topbar" aria-label="Project toolbar">
+    <div class="topbar-brand">
+      <!-- CUTORA logo -->
+      <div class="topbar-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </div>
+      <span class="topbar-title">CUTORA</span>
+    </div>
+
+    <div class="topbar-center">
+      <label for="project-name" class="topbar-project-label">Project</label>
+      <input
+        id="project-name"
+        type="text"
+        class="topbar-project-name"
+        value="Untitled Project"
+        aria-label="Project name"
+        placeholder="Untitled Project"
+      />
+    </div>
+
+    <div class="topbar-actions">
+      <button
+        id="btn-new-project"
+        type="button"
+        class="topbar-btn"
+        title="New project"
+        aria-label="New project"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+        <span>New</span>
+      </button>
+
+      <button
+        id="btn-undo"
+        type="button"
+        class="topbar-btn"
+        title="Undo (Ctrl+Z)"
+        aria-label="Undo"
+        disabled
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+        </svg>
+        <span>Undo</span>
+      </button>
+
+      <button
+        id="btn-redo"
+        type="button"
+        class="topbar-btn"
+        title="Redo (Ctrl+Shift+Z)"
+        aria-label="Redo"
+        disabled
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        <span>Redo</span>
+      </button>
+
+      <span aria-hidden="true" class="topbar-spacer"></span>
+
+      <button
+        id="btn-open-project"
+        type="button"
+        class="topbar-btn"
+        title="Open project (Ctrl+O)"
+        aria-label="Open project"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>Open</span>
+      </button>
+
+      <button
+        id="btn-save"
+        type="button"
+        class="topbar-btn"
+        title="Save project (Ctrl+S)"
+        aria-label="Save project"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        <span>Save</span>
+      </button>
+
+      <button
+        id="btn-export"
+        type="button"
+        class="topbar-btn topbar-btn-primary"
+        title="Export video"
+        aria-label="Export video"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="23 7 16 12 23 17 23 7"/>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+        </svg>
+        <span>Export</span>
+      </button>
+
+      <span aria-hidden="true" class="topbar-spacer"></span>
+
+      <a
+        id="github-link"
+        class="topbar-github"
+        href="https://github.com/cyber-rover-ion"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="CUTORA on GitHub"
+        aria-label="CUTORA source on GitHub"
+      >
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN LAYOUT ===================== -->
+  <main class="editor-layout">
+
+    <!-- ===================== LEFT SIDEBAR ===================== -->
+    <aside id="left-panel" class="side-panel side-panel--left" aria-label="Media and assets panel">
+      <div class="side-panel-tabs" role="tablist" aria-label="Sidebar tabs">
+        <button
+          role="tab"
+          id="tab-media"
+          class="side-panel-tab side-panel-tab--active"
+          data-panel="panel-media"
+          aria-selected="true"
+          aria-controls="panel-media"
+          tabindex="0"
+          title="Media assets (M)"
+        >Media</button>
+
+        <button
+          role="tab"
+          id="tab-audio"
+          class="side-panel-tab"
+          data-panel="panel-audio"
+          aria-selected="false"
+          aria-controls="panel-audio"
+          tabindex="-1"
+          title="Audio assets"
+        >Audio</button>
+
+        <button
+          role="tab"
+          id="tab-text"
+          class="side-panel-tab"
+          data-panel="panel-text"
+          aria-selected="false"
+          aria-controls="panel-text"
+          tabindex="-1"
+          title="Text assets"
+        >Text</button>
+
+        <button
+          role="tab"
+          id="tab-stickers"
+          class="side-panel-tab"
+          data-panel="panel-stickers"
+          aria-selected="false"
+          aria-controls="panel-stickers"
+          tabindex="-1"
+          title="Stickers"
+        >Stickers</button>
+
+        <button
+          role="tab"
+          id="tab-effects"
+          class="side-panel-tab"
+          data-panel="panel-effects"
+          aria-selected="false"
+          aria-controls="panel-effects"
+          tabindex="-1"
+          title="Visual effects"
+        >Effects</button>
+
+        <button
+          role="tab"
+          id="tab-transitions"
+          class="side-panel-tab"
+          data-panel="panel-transitions"
+          aria-selected="false"
+          aria-controls="panel-transitions"
+          tabindex="-1"
+          title="Transitions"
+        >Transitions</button>
+
+        <button
+          role="tab"
+          id="tab-filters"
+          class="side-panel-tab"
+          data-panel="panel-filters"
+          aria-selected="false"
+          aria-controls="panel-filters"
+          tabindex="-1"
+          title="Filters"
+        >Filters</button>
+      </div>
+
+      <!-- Media panel (default) -->
+      <section id="panel-media" class="side-panel-content side-panel-content--active" role="tabpanel" aria-labelledby="tab-media">
+        <div class="panel-header">
+          <div class="panel-header-row">
+            <button
+              id="btn-import-media"
+              type="button"
+              class="panel-import-btn"
+              title="Import media files"
+              aria-label="Import media"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span>Import media</span>
+            </button>
+            <input
+              id="file-input"
+              type="file"
+              class="panel-file-input"
+              accept="video/*,audio/*,image/*"
+              multiple
+              aria-label="Select media files"
+              title="Import media files"
+            />
+          </div>
+          <div class="panel-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="panel-search-icon">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              class="panel-search-input"
+              placeholder="Search media"
+              aria-label="Search media library"
+            />
+          </div>
+        </div>
+
+        <div id="media-library" class="media-library" aria-label="Media library">
+          <!-- Media items will be rendered here -->
+          <div id="media-empty" class="media-empty" role="status">
+            <div class="media-empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+            <p class="media-empty-title">No media imported</p>
+            <p class="media-empty-subtitle">Click <strong>Import media</strong> to add clips, images, or audio.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Audio panel (hidden initially) -->
+      <section id="panel-audio" class="side-panel-content" role="tabpanel" aria-labelledby="tab-audio" hidden>
+        <div class="panel-header">
+          <div class="panel-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="panel-search-icon">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              class="panel-search-input"
+              placeholder="Search audio"
+              aria-label="Search audio library"
+            />
+          </div>
+        </div>
+        <div class="media-library" aria-label="Audio library">
+          <div class="media-empty" role="status">
+            <p class="media-empty-subtitle">Import audio files from the Media tab to see them here.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Text panel -->
+      <section id="panel-text" class="side-panel-content" role="tabpanel" aria-labelledby="tab-text" hidden>
+        <div class="panel-header">
+          <div class="panel-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="panel-search-icon">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              class="panel-search-input"
+              placeholder="Search text styles"
+              aria-label="Search text styles"
+            />
+          </div>
+        </div>
+        <div class="media-library" aria-label="Text styles">
+          <div class="media-empty" role="status">
+            <p class="media-empty-subtitle">Text templates and styles will appear here.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stickers panel -->
+      <section id="panel-stickers" class="side-panel-content" role="tabpanel" aria-labelledby="tab-stickers" hidden>
+        <div class="panel-header">
+          <div class="panel-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="panel-search-icon">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              class="panel-search-input"
+              placeholder="Search stickers"
+              aria-label="Search stickers"
+            />
+          </div>
+        </div>
+        <div class="media-library" aria-label="Stickers library">
+          <div class="media-empty" role="status">
+            <p class="media-empty-subtitle">Stickers and overlays will appear here.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Effects panel -->
+      <section id="panel-effects" class="side-panel-content" role="tabpanel" aria-labelledby="tab-effects" hidden>
+        <div class="panel-header">
+          <div class="panel-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="panel-search-icon">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              class="panel-search-input"
+              placeholder="Search effects"
+              aria-label="Search effects"
+            />
+          </div>
+        </div>
+        <div class="media-library" aria-label="Effects library">
+          <div class="media-empty" role="status">
+            <p class="media-empty-subtitle">Visual effects will appear here.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Transitions panel -->
+      <section id="panel-transitions" class="side-panel-content" role="tabpanel" aria-labelledby="tab-transitions" hidden>
+        <div class="panel-header">
+          <div class="panel-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="panel-search-icon">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              class="panel-search-input"
+              placeholder="Search transitions"
+              aria-label="Search transitions"
+            />
+          </div>
+        </div>
+        <div class="media-library" aria-label="Transitions library">
+          <div class="media-empty" role="status">
+            <p class="media-empty-subtitle">Transitions will appear here.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters panel -->
+      <section id="panel-filters" class="side-panel-content" role="tabpanel" aria-labelledby="tab-filters" hidden>
+        <div class="panel-header">
+          <div class="panel-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="panel-search-icon">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              class="panel-search-input"
+              placeholder="Search filters"
+              aria-label="Search filters"
+            />
+          </div>
+        </div>
+        <div class="media-library" aria-label="Filters library">
+          <div class="media-empty" role="status">
+            <p class="media-empty-subtitle">Filters will appear here.</p>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- ===================== CENTRAL PREVIEW ===================== -->
+    <section id="preview-container" class="preview-area" aria-label="Video preview">
+      <div class="preview-stage">
+        <video
+          id="preview-video"
+          class="preview-video"
+          controls="false"
+          playsinline
+          muted
+          aria-label="Video preview"
+          preload="metadata"
+        ></video>
+
+        <div id="preview-overlay" class="preview-overlay" aria-hidden="true">
+          <!-- Text and image layers will be rendered here -->
+        </div>
+
+        <div id="preview-empty" class="preview-empty" role="status">
+          <div class="preview-empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M10 9l5 3-5 3V9z"/>
+            </svg>
+          </div>
+          <p class="preview-empty-title">No video preview</p>
+          <p class="preview-empty-subtitle">Import a video clip to begin editing.</p>
+        </div>
+      </div>
+
+      <div class="preview-controls" aria-label="Preview playback controls">
+        <div class="playback-row">
+          <button
+            id="btn-play-pause"
+            type="button"
+            class="playback-btn"
+            title="Play / Pause (Space)"
+            aria-label="Play or pause video"
+            disabled
+          >
+            <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <svg id="pause-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none">
+              <rect x="6" y="4" width="4" height="16"/>
+              <rect x="14" y="4" width="4" height="16"/>
+            </svg>
+          </button>
+
+          <span id="current-time" class="time-display" aria-label="Current time">0:00</span>
+
+          <div class="seek-control">
+            <input
+              type="range"
+              id="playback-seek"
+              class="seek-slider"
+              min="0"
+              max="100"
+              step="0.01"
+              value="0"
+              aria-label="Seek video position"
+              title="Seek"
+            />
+          </div>
+
+          <span id="total-duration" class="time-display" aria-label="Total duration">0:00</span>
+        </div>
+
+        <div class="playback-row playback-row--secondary">
+          <div class="volume-control">
+            <button
+              id="btn-mute"
+              type="button"
+              class="volume-btn"
+              title="Mute / Unmute (M)"
+              aria-label="Mute or unmute audio"
+              aria-pressed="false"
+            >
+              <svg id="volume-on-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+              <svg id="volume-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <line x1="23" y1="9" x2="17" y2="15"/>
+                <line x1="17" y1="9" x2="23" y2="15"/>
+              </svg>
+            </button>
+            <input
+              type="range"
+              id="volume-slider"
+              class="volume-slider"
+              min="0"
+              max="1"
+              step="0.05"
+              value="1"
+              aria-label="Volume"
+              title="Volume"
+            />
+          </div>
+
+          <span aria-hidden="true" class="playback-divider"></span>
+
+          <div class="aspect-control">
+            <label for="aspect-ratio-select" class="aspect-label">Aspect</label>
+            <select
+              id="aspect-ratio-select"
+              class="aspect-select"
+              aria-label="Preview aspect ratio"
+              title="Aspect ratio"
+            >
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16</option>
+              <option value="1:1">1:1</option>
+              <option value="4:5">4:5 Social</option>
+              <option value="4:3">4:3</option>
+              <option value="3:4">3:4</option>
+              <option value="21:9">21:9</option>
+              <option value="Original">Original</option>
+            </select>
+          </div>
+
+          <span aria-hidden="true" class="playback-divider"></span>
+
+          <button
+            id="btn-fullscreen"
+            type="button"
+            class="fullscreen-btn"
+            title="Toggle fullscreen (F)"
+            aria-label="Toggle fullscreen"
+          >
+            <svg id="fullscreen-enter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            </svg>
+            <svg id="fullscreen-exit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none">
+              <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== RIGHT PROPERTIES PANEL ===================== -->
+    <aside id="properties-panel" class="side-panel side-panel--right" aria-label="Clip properties">
+      <div class="panel-header">
+        <h2 class="panel-title">Properties</h2>
+        <button
+          id="btn-context-clear"
+          type="button"
+          class="properties-clear-btn"
+          title="Clear selection"
+          aria-label="Clear selection"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          <span class="properties-clear-label">Selection</span>
+        </button>
+      </div>
+
+      <!-- No selection state -->
+      <div id="properties-empty" class="properties-empty" role="status">
+        <div class="properties-empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0 1.51 1z"/>
+          </svg>
+        </div>
+        <p class="properties-empty-title">No selection</p>
+        <p class="properties-empty-subtitle">Select a clip on the timeline to edit its properties.</p>
+      </div>
+
+      <!-- Transform controls -->
+      <div id="properties-transform" class="properties-section" hidden>
+        <h3 class="properties-section-title">Transform</h3>
+
+        <div class="properties-grid">
+          <div class="properties-field">
+            <label for="prop-position-x" class="properties-label">Position X</label>
+            <div class="properties-input-row">
+              <input
+                type="number"
+                id="prop-position-x"
+                class="properties-input"
+                value="0"
+                step="1"
+                aria-label="Position X"
+              />
+              <span class="properties-unit">px</span>
+            </div>
+          </div>
+
+          <div class="properties-field">
+            <label for="prop-position-y" class="properties-label">Position Y</label>
+            <div class="properties-input-row">
+              <input
+                type="number"
+                id="prop-position-y"
+                class="properties-input"
+                value="0"
+                step="1"
+                aria-label="Position Y"
+              />
+              <span class="properties-unit">px</span>
+            </div>
+          </div>
+
+          <div class="properties-field">
+            <label for="prop-scale" class="properties-label">Scale</label>
+            <div class="properties-input-row">
+              <input
+                type="number"
+                id="prop-scale"
+                class="properties-input"
+                value="100"
+                min="0"
+                max="1000"
+                step="1"
+                aria-label="Scale percentage"
+              />
+              <span class="properties-unit">%</span>
+            </div>
+          </div>
+
+          <div class="properties-field">
+            <label for="prop-rotation" class="properties-label">Rotation</label>
+            <div class="properties-input-row">
+              <input
+                type="number"
+                id="prop-rotation"
+                class="properties-input"
+                value="0"
+                step="1"
+                aria-label="Rotation degrees"
+              />
+              <span class="properties-unit">°</span>
+            </div>
+          </div>
+
+          <div class="properties-field">
+            <label for="prop-opacity" class="properties-label">Opacity</label>
+            <div class="properties-input-row properties-input-row--range">
+              <input
+                type="range"
+                id="prop-opacity-slider"
+                class="properties-range"
+                min="0"
+                max="100"
+                step="1"
+                value="100"
+                aria-label="Opacity"
+              />
+              <input
+                type="number"
+                id="prop-opacity"
+                class="properties-input properties-input--linked"
+                value="100"
+                min="0"
+                max="100"
+                step="1"
+                aria-label="Opacity percentage"
+              />
+              <span class="properties-unit">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video adjustment controls -->
+      <div id="properties-video" class="properties-section" hidden>
+        <h3 class="properties-section-title">Video</h3>
+        <div class="properties-adjust-grid">
+          <div class="properties-adjust-field">
+            <label for="adj-brightness" class="properties-label">Brightness</label>
+            <div class="properties-input-row properties-input-row--range">
+              <input
+                type="range"
+                id="adj-brightness"
+                class="properties-range"
+                min="-100"
+                max="100"
+                step="1"
+                value="0"
+                aria-label="Brightness adjustment"
+              />
+              <input
+                type="number"
+                id="adj-brightness-value"
+                class="properties-input properties-input--linked"
+                value="0"
+                min="-100"
+                max="100"
+                step="1"
+                aria-label="Brightness value"
+              />
+              <span class="properties-unit">%</span>
+            </div>
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-contrast" class="properties-label">Contrast</label>
+            <div class="properties-input-row properties-input-row--range">
+              <input
+                type="range"
+                id="adj-contrast"
+                class="properties-range"
+                min="-100"
+                max="100"
+                step="1"
+                value="0"
+                aria-label="Contrast adjustment"
+              />
+              <input
+                type="number"
+                id="adj-contrast-value"
+                class="properties-input properties-input--linked"
+                value="0"
+                min="-100"
+                max="100"
+                step="1"
+                aria-label="Contrast value"
+              />
+              <span class="properties-unit">%</span>
+            </div>
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-saturation" class="properties-label">Saturation</label>
+            <div class="properties-input-row properties-input-row--range">
+              <input
+                type="range"
+                id="adj-saturation"
+                class="properties-range"
+                min="-100"
+                max="100"
+                step="1"
+                value="0"
+                aria-label="Saturation adjustment"
+              />
+              <input
+                type="number"
+                id="adj-saturation-value"
+                class="properties-input properties-input--linked"
+                value="0"
+                min="-100"
+                max="100"
+                step="1"
+                aria-label="Saturation value"
+              />
+              <span class="properties-unit">%</span>
+            </div>
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-temperature" class="properties-label">Temperature</label>
+            <div class="properties-input-row properties-input-row--range">
+              <input
+                type="range"
+                id="adj-temperature"
+                class="properties-range"
+                min="-100"
+                max="100"
+                step="1"
+                value="0"
+                aria-label="Temperature adjustment"
+              />
+              <input
+                type="number"
+                id="adj-temperature-value"
+                class="properties-input properties-input--linked"
+                value="0"
+                min="-100"
+                max="100"
+                step="1"
+                aria-label="Temperature value"
+              />
+              <span class="properties-unit">%</span>
+            </div>
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-grayscale" class="properties-label">Grayscale</label>
+            <div class="properties-input-row properties-input-row--range">
+              <input
+                type="range"
+                id="adj-grayscale"
+                class="properties-range"
+                min="0"
+                max="100"
+                step="1"
+                value="0"
+                aria-label="Grayscale adjustment"
+              />
+              <input
+                type="number"
+                id="adj-grayscale-value"
+                class="properties-input properties-input--linked"
+                value="0"
+                min="0"
+                max="100"
+                step="1"
+                aria-label="Grayscale value"
+              />
+              <span class="properties-unit">%</span>
+            </div>
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-blur" class="properties-label">Blur</label>
+            <div class="properties-input-row properties-input-row--range">
+              <input
+                type="range"
+                id="adj-blur"
+                class="properties-range"
+                min="0"
+                max="20"
+                step="0.5"
+                value="0"
+                aria-label="Blur adjustment"
+              />
+              <input
+                type="number"
+                id="adj-blur-value"
+                class="properties-input properties-input--linked"
+                value="0"
+                min="0"
+                max="20"
+                step="0.5"
+                aria-label="Blur value"
+              />
+              <span class="properties-unit">px</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio adjustment controls -->
+      <div id="properties-audio" class="properties-section" hidden>
+        <h3 class="properties-section-title">Audio</h3>
+        <div class="properties-adjust-grid">
+          <div class="properties-adjust-field">
+            <label for="adj-volume" class="properties-label">Volume</label>
+            <div class="properties-input-row properties-input-row--range">
+              <input
+                type="range"
+                id="adj-volume"
+                class="properties-range"
+                min="0"
+                max="200"
+                step="1"
+                value="100"
+                aria-label="Audio volume"
+              />
+              <input
+                type="number"
+                id="adj-volume-value"
+                class="properties-input properties-input--linked"
+                value="100"
+                min="0"
+                max="200"
+                step="1"
+                aria-label="Audio volume percentage"
+              />
+              <span class="properties-unit">%</span>
+            </div>
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-fade-in" class="properties-label">Fade in</label>
+            <div class="properties-input-row">
+              <input
+                type="number"
+                id="adj-fade-in"
+                class="properties-input"
+                value="0"
+                step="0.1"
+                min="0"
+                aria-label="Fade in duration in seconds"
+              />
+              <span class="properties-unit">s</span>
+            </div>
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-fade-out" class="properties-label">Fade out</label>
+            <div class="properties-input-row">
+              <input
+                type="number"
+                id="adj-fade-out"
+                class="properties-input"
+                value="0"
+                step="0.1"
+                min="0"
+                aria-label="Fade out duration in seconds"
+              />
+              <span class="properties-unit">s</span>
+            </div>
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-speed" class="properties-label">Speed</label>
+            <div class="properties-input-row properties-input-row--range">
+              <input
+                type="range"
+                id="adj-speed"
+                class="properties-range"
+                min="0.25"
+                max="4"
+                step="0.05"
+                value="1"
+                aria-label="Playback speed"
+              />
+              <input
+                type="number"
+                id="adj-speed-value"
+                class="properties-input properties-input--linked"
+                value="1"
+                min="0.25"
+                max="4"
+                step="0.05"
+                aria-label="Playback speed value"
+              />
+              <span class="properties-unit">×</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text adjustment controls -->
+      <div id="properties-text" class="properties-section" hidden>
+        <h3 class="properties-section-title">Text</h3>
+        <div class="properties-adjust-grid">
+          <div class="properties-adjust-field">
+            <label for="adj-text-content" class="properties-label">Content</label>
+            <input
+              type="text"
+              id="adj-text-content"
+              class="properties-input properties-input--wide"
+              value=""
+              placeholder="Enter text"
+              aria-label="Text content"
+            />
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-text-font-size" class="properties-label">Font size</label>
+            <div class="properties-input-row">
+              <input
+                type="number"
+                id="adj-text-font-size"
+                class="properties-input"
+                value="48"
+                min="8"
+                step="1"
+                aria-label="Text font size"
+              />
+              <span class="properties-unit">px</span>
+            </div>
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-text-color" class="properties-label">Color</label>
+            <div class="properties-input-row">
+              <input
+                type="color"
+                id="adj-text-color"
+                class="properties-color"
+                value="#ffffff"
+                aria-label="Text color"
+              />
+              <input
+                type="text"
+                id="adj-text-color-value"
+                class="properties-input properties-input--linked"
+                value="#FFFFFF"
+                aria-label="Text color hex value"
+                maxlength="7"
+              />
+            </div>
+          </div>
+
+          <div class="properties-adjust-field">
+            <label for="adj-text-align" class="properties-label">Align</label>
+            <div class="properties-input-row">
+              <select id="adj-text-align" class="properties-select" aria-label="Text alignment">
+                <option value="left">Left</option>
+                <option value="center" selected>Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ===================== BOTTOM TIMELINE ===================== -->
+  <footer id="timeline" class="timeline" aria-label="Editing timeline">
+    <div class="timeline-top">
+      <div class="timeline-info">
+        <span class="timeline-label">Timeline</span>
+        <span id="timeline-duration" class="timeline-duration" aria-label="Total timeline duration">00:00:00</span>
+      </div>
+
+      <div class="timeline-controls">
+        <div class="timeline-zoom-controls">
+          <label for="timeline-zoom" class="sr-only">Timeline zoom</label>
+          <button
+            id="timeline-zoom-out"
+            type="button"
+            class="timeline-zoom-btn"
+            title="Zoom out"
+            aria-label="Zoom out"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+          </button>
+          <input
+            type="range"
+            id="timeline-zoom"
+            class="timeline-zoom-slider"
+            min="1"
+            max="100"
+            step="1"
+            value="50"
+            aria-label="Timeline zoom level"
+            title="Timeline zoom"
+          />
+          <button
+            id="timeline-zoom-in"
+            type="button"
+            class="timeline-zoom-btn"
+            title="Zoom in"
+            aria-label="Zoom in"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <line x1="11" y1="8" x2="11" y2="14"/>
+              <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="timeline-add-tracks">
+          <button
+            type="button"
+            id="btn-add-track-video"
+            class="timeline-add-btn"
+            title="Add video track"
+            aria-label="Add video track"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Video
+          </button>
+          <button
+            type="button"
+            id="btn-add-track-overlay"
+            class="timeline-add-btn"
+            title="Add overlay track"
+            aria-label="Add overlay track"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <polyline points="12 8 8 12 12 16 16 12 12 8"/>
+            </svg>
+            Overlay
+          </button>
+          <button
+            type="button"
+            id="btn-add-track-text"
+            class="timeline-add-btn"
+            title="Add text track"
+            aria-label="Add text track"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="4 7 4 4 20 4 20 7"/>
+              <line x1="9" y1="20" x2="15" y2="20"/>
+              <line x1="12" y1="4" x2="12" y2="20"/>
+            </svg>
+            Text
+          </button>
+          <button
+            type="button"
+            id="btn-add-track-audio"
+            class="timeline-add-btn"
+            title="Add audio track"
+            aria-label="Add audio track"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 18V5l12-2v13"/>
+              <circle cx="6" cy="18" r="3"/>
+              <circle cx="18" cy="16" r="3"/>
+            </svg>
+            Audio
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="timeline-scroll" class="timeline-scroll" tabindex="0" aria-label="Timeline scroll area">
+      <div id="timeline-ruler" class="timeline-ruler" role="img" aria-label="Timeline ruler">
+        <!-- Time markers will be rendered here -->
+      </div>
+
+      <div id="timeline-tracks" class="timeline-tracks" role="list" aria-label="Timeline tracks">
+        <!-- Track: Video -->
+        <div
+          id="track-video"
+          class="timeline-track"
+          role="listitem"
+          data-track-type="video"
+          data-track-index="0"
+        >
+          <div class="track-header">
+            <span class="track-name">Video 1</span>
+            <div class="track-actions">
+              <button
+                type="button"
+                class="track-btn track-btn--visibility"
+                title="Toggle track visibility"
+                aria-label="Toggle video track visibility",
+                aria-pressed="true"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--mute"
+                title="Mute track"
+                aria-label="Mute video track",
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <line x1="23" y1="9" x2="17" y2="15"/>
+                  <line x1="17" y1="9" x2="23" y2="15"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--lock"
+                title="Lock track"
+                aria-label="Lock video track",
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--delete"
+                title="Delete track"
+                aria-label="Delete video track"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="track-content" data-track-content="video">
+            <!-- Clip blocks will be added here -->
+          </div>
+        </div>
+
+        <!-- Track: Overlay -->
+        <div
+          id="track-overlay"
+          class="timeline-track"
+          role="listitem"
+          data-track-type="overlay"
+          data-track-index="1"
+        >
+          <div class="track-header">
+            <span class="track-name">Overlay 1</span>
+            <div class="track-actions">
+              <button
+                type="button"
+                class="track-btn track-btn--visibility"
+                title="Toggle track visibility"
+                aria-label="Toggle overlay track visibility",
+                aria-pressed="true"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--mute"
+                title="Mute track"
+                aria-label="Mute overlay track",
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <line x1="23" y1="9" x2="17" y2="15"/>
+                  <line x1="17" y1="9" x2="23" y2="15"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--lock"
+                title="Lock track"
+                aria-label="Lock overlay track",
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--delete"
+                title="Delete track"
+                aria-label="Delete overlay track"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="track-content" data-track-content="overlay">
+            <!-- Clip blocks will be added here -->
+          </div>
+        </div>
+
+        <!-- Track: Text -->
+        <div
+          id="track-text"
+          class="timeline-track"
+          role="listitem"
+          data-track-type="text"
+          data-track-index="2"
+        >
+          <div class="track-header">
+            <span class="track-name">Text 1</span>
+            <div class="track-actions">
+              <button
+                type="button"
+                class="track-btn track-btn--visibility"
+                title="Toggle track visibility"
+                aria-label="Toggle text track visibility",
+                aria-pressed="true"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--mute"
+                title="Mute track"
+                aria-label="Mute text track",
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <line x1="23" y1="9" x2="17" y2="15"/>
+                  <line x1="17" y1="9" x2="23" y2="15"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--lock"
+                title="Lock track"
+                aria-label="Lock text track",
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--delete"
+                title="Delete track"
+                aria-label="Delete text track"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="track-content" data-track-content="text">
+            <!-- Clip blocks will be added here -->
+          </div>
+        </div>
+
+        <!-- Track: Audio -->
+        <div
+          id="track-audio"
+          class="timeline-track"
+          role="listitem"
+          data-track-type="audio"
+          data-track-index="3"
+        >
+          <div class="track-header">
+            <span class="track-name">Audio 1</span>
+            <div class="track-actions">
+              <button
+                type="button"
+                class="track-btn track-btn--visibility"
+                title="Toggle track visibility"
+                aria-label="Toggle audio track visibility",
+                aria-pressed="true"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--mute"
+                title="Mute track"
+                aria-label="Mute audio track",
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <line x1="23" y1="9" x2="17" y2="15"/>
+                  <line x1="17" y1="9" x2="23" y2="15"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--lock"
+                title="Lock track"
+                aria-label="Lock audio track",
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="track-btn track-btn--delete"
+                title="Delete track"
+                aria-label="Delete audio track"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="track-content" data-track-content="audio">
+            <!-- Clip blocks will be added here -->
+          </div>
+        </div>
+
+        <!-- Empty state when no media -->
+        <div id="timeline-empty" class="timeline-empty" role="status">
+          <div class="timeline-empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M10 9l5 3-5 3V9z"/>
+            </svg>
+          </div>
+          <p class="timeline-empty-title">Drop media here to start</p>
+          <p class="timeline-empty-subtitle">Import a file or drag clips onto the timeline.</p>
+        </div>
+      </div>
+
+      <!-- Playhead -->
+      <div id="timeline-playhead" class="timeline-playhead" aria-hidden="true" style="left:0px">
+        <div class="playhead-head"></div>
+        <div class="playhead-line"></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== DIALOGS ===================== -->
+
+  <!-- New-project confirmation dialog -->
+  <div
+    id="dialog-new-project"
+    class="dialog overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="dialog-new-project-title"
+    aria-describedby="dialog-new-project-desc"
+    hidden
+  >
+    <div class="dialog-backdrop" data-dialog-close></div>
+    <div class="dialog-card">
+      <header class="dialog-header">
+        <h2 id="dialog-new-project-title" class="dialog-title">New project</h2>
+        <button
+          type="button"
+          class="dialog-close"
+          data-dialog-close
+          title="Close dialog"
+          aria-label="Close dialog"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </header>
+      <div class="dialog-body">
+        <p id="dialog-new-project-desc" class="dialog-description">
+          Create a new project? Unsaved changes to the current project will be lost.
+        </p>
+      </div>
+      <footer class="dialog-footer">
+        <button
+          type="button"
+          class="dialog-btn dialog-btn--secondary"
+          data-dialog-close
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="dialog-btn dialog-btn--primary"
+          id="dialog-new-project-confirm"
+        >
+          New project
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Export settings dialog -->
+  <div
+    id="dialog-export"
+    class="dialog overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="dialog-export-title"
+    aria-describedby="dialog-export-desc"
+    hidden
+  >
+    <div class="dialog-backdrop" data-dialog-close></div>
+    <div class="dialog-card dialog-card--wide">
+      <header class="dialog-header">
+        <h2 id="dialog-export-title" class="dialog-title">Export video</h2>
+        <button
+          type="button"
+          class="dialog-close"
+          data-dialog-close
+          title="Close dialog"
+          aria-label="Close dialog"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </header>
+      <div class="dialog-body">
+        <p id="dialog-export-desc" class="dialog-description">
+          Configure export settings for your final video.
+        </p>
+
+        <div class="export-options">
+          <div class="export-group">
+            <label for="export-resolution" class="export-label">Resolution</label>
+            <select id="export-resolution" class="export-select" aria-label="Export resolution">
+              <option value="1920x1080">1080p (1920×1080)</option>
+              <option value="1280x720">720p (1280×720)</option>
+              <option value="3840x2160">4K (3840×2160)</option>
+              <option value="2560x1440">1440p (2560×1440)</option>
+              <option value="854x480">480p (854×480)</option>
+            </select>
+          </div>
+
+          <div class="export-group">
+            <label for="export-framerate" class="export-label">Frame rate (fps)</label>
+            <select id="export-framerate" class="export-select" aria-label="Export frame rate">
+              <option value="24">24 fps</option>
+              <option value="25">25 fps</option>
+              <option value="30" selected>30 fps</option>
+              <option value="60">60 fps</option>
+            </select>
+          </div>
+
+          <div class="export-group">
+            <label for="export-format" class="export-label">Format</label>
+            <select id="export-format" class="export-select" aria-label="Export format">
+              <option value="mp4">MP4 (H.264)</option>
+              <option value="webm">WebM (VP9)</option>
+              <option value="mov">MOV</option>
+            </select>
+          </div>
+
+          <div class="export-group">
+            <label for="export-quality" class="export-label">Quality</label>
+            <select id="export-quality" class="export-select" aria-label="Export quality">
+              <option value="high">High</option>
+              <option value="medium" selected>Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <footer class="dialog-footer">
+        <button
+          type="button"
+          class="dialog-btn dialog-btn--secondary"
+          data-dialog-close
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="dialog-btn dialog-btn--primary"
+          id="dialog-export-start"
+        >
+          Export
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Keyboard shortcuts help dialog --><div
+    id="dialog-shortcuts"
+    class="dialog overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="dialog-shortcuts-title"
+    aria-describedby="dialog-shortcuts-desc"
+    hidden
+  >
+    <div class="dialog-backdrop" data-dialog-close></div>
+    <div class="dialog-card">
+      <header class="dialog-header">
+        <h2 id="dialog-shortcuts-title" class="dialog-title">Keyboard shortcuts</h2>
+        <button
+          type="button"
+          class="dialog-close"
+          data-dialog-close
+          title="Close dialog (Esc)"
+          aria-label="Close shortcuts dialog"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </header>
+      <div class="dialog-body">
+        <div class="shortcuts-grid">
+          <div class="shortcut-group">
+            <p class="shortcut-group-title">Playback</p>
+            <div class="shortcut-row"><kbd>Space</kbd><span>Play / Pause</span></div>
+            <div class="shortcut-row"><kbd>J</kbd><span>Rewind</span></div>
+            <div class="shortcut-row"><kbd>K</kbd><span>Pause</span></div>
+            <div class="shortcut-row"><kbd>L</kbd><span>Fast forward</span></div>
+          </div>
+
+          <div class="shortcut-group">
+            <p class="shortcut-group-title">Editing</p>
+            <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>Z</kbd><span>Undo</span></div>
+            <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>Z</kbd><span>Redo</span></div>
+            <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>S</kbd><span>Save</span></div>
+            <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>E</kbd><span>Export</span></div>
+          </div>
+
+          <div class="shortcut-group">
+            <p class="shortcut-group-title">Tools</p>
+            <div class="shortcut-row"><kbd>V</kbd><span>Selection</span></div>
+            <div class="shortcut-row"><kbd>M</kbd><span>Mute / Unmute</span></div>
+            <div class="shortcut-row"><kbd>F</kbd><span>Fullscreen</span></div>
+            <div class="shortcut-row"><kbd>?</kbd><span>Show shortcuts</span></div>
+          </div>
+        </div>
+      </div>
+      <footer class="dialog-footer">
+        <button
+          type="button"
+          class="dialog-btn dialog-btn--primary"
+          data-dialog-close
+          id="dialog-shortcuts-close"
+        >
+          Close
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST NOTIFICATIONS ===================== -->
+  <div
+    id="notifications"
+    class="notifications"
+    aria-live="polite"
+    aria-atomic="true"
+    aria-label="Notifications"
+  >
+    <!-- Toast notifications will be injected here -->
+  </div>
+
+</body>
+</html>
