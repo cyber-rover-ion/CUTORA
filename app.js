@@ -1400,47 +1400,91 @@
     const primary = videoClip || overlayMediaClip;
     const audioClip = activeHumanClipAt('audio', t);
 
-    syncMediaElement(el.previewVideo, primary, t);
+    // Still images must not be assigned to a <video> element. Use a dedicated
+    // fitted image layer for images on the primary video track.
+    const primaryStill = primary && primary.type === 'image' && primary.trackType === 'video'
+      ? primary
+      : null;
+    syncPreviewStill(primaryStill);
+    syncMediaElement(el.previewVideo, primary && primary.type === 'video' ? primary : null, t);
     syncMediaElement(el.previewAudio, audioClip, t);
     renderOverlaysForTime();
     applyActiveClipProcessing();
   }
 
-  function syncMediaElement(element, clip, t) {
-    if (!element) return;
+  function syncPreviewStill(clip) {
+    if (!previewStill) return;
     if (!clip || clip.missing || !clip.assetId) {
-      if (!element.paused) element.pause();
+      previewStill.hidden = true;
+      previewStill.removeAttribute('src');
+      if (el.previewVideo) el.previewVideo.hidden = false;
       return;
     }
     const asset = assetById(clip.assetId);
-    if (!asset || asset.missing) {
+    if (!asset || asset.missing || !asset.url) {
+      previewStill.hidden = true;
+      if (el.previewVideo) el.previewVideo.hidden = false;
+      return;
+    }
+    if (previewStill.getAttribute('src') !== asset.url) previewStill.src = asset.url;
+    previewStill.hidden = false;
+    if (el.previewVideo) el.previewVideo.hidden = true;
+  }
+
+  function syncMediaElement(element, clip, t) {
+    if (!element) return;
+    if (!clip || clip.type !== 'video' || clip.missing || !clip.assetId) {
+      if (!element.paused) element.pause();
+      if (element.hasAttribute('data-cutora-src')) {
+        element.removeAttribute('data-cutora-src');
+        element.removeAttribute('src');
+        element.load();
+      }
+      return;
+    }
+    const asset = assetById(clip.assetId);
+    if (!asset || asset.missing || !asset.url) {
       if (!element.paused) element.pause();
       return;
     }
-    // Speed-corrected source-time mapping: timeline seconds × speed = media seconds
-    const speed = clamp(clip.props.speed || 1, 0.25, 4);
-    const localTime = clip.inPoint + (t - clip.start) * speed;
 
-    // Switch source only when needed (avoids reload glitches)
-    const currentSrc = element.getAttribute('data-cutora-src');
-    if (currentSrc !== asset.url) {
+    const speed = clamp(clip.props.speed || 1, 0.25, 4);
+    const localTime = clip.inPoint + Math.max(0, t - clip.start) * speed;
+    const sourceChanged = element.getAttribute('data-cutora-src') !== asset.url;
+
+    if (sourceChanged) {
       element.setAttribute('data-cutora-src', asset.url);
+      element.dataset.cutoraLoadingSrc = asset.url;
       element.src = asset.url;
+      const sourceForListener = asset.url;
+      element.addEventListener('loadedmetadata', () => {
+        if (element.getAttribute('data-cutora-src') !== sourceForListener) return;
+        delete element.dataset.cutoraLoadingSrc;
+        applyTime();
+      }, { once: true });
+      element.addEventListener('error', () => {
+        if (element.getAttribute('data-cutora-src') !== sourceForListener) return;
+        delete element.dataset.cutoraLoadingSrc;
+        if (element === el.previewVideo) showToast('This video format could not be decoded by your browser', 'error');
+      }, { once: true });
     }
-    const applyTime = () => {
-      try {
-        const maxT = isFinite(element.duration) && element.duration > 0 ? element.duration - 0.01 : localTime;
-        element.currentTime = clamp(localTime, 0, Math.max(maxT, 0));
-      } catch (err) { /* metadata not ready yet */ }
-    };
-    if (element.readyState >= 1 && isFinite(element.duration) && element.duration > 0) {
-      if (Math.abs(element.currentTime - localTime) > 0.25) applyTime();
-    } else {
-      element.addEventListener('loadedmetadata', applyTime, { once: true });
+
+    function applyTime() {
+      if (element.getAttribute('data-cutora-src') !== asset.url || element.dataset.cutoraLoadingSrc === asset.url) return;
+      if (element.readyState < 1 || !isFinite(element.duration) || element.duration <= 0) return;
+      const target = clamp(localTime, 0, Math.max(0, element.duration - 0.01));
+      if (Math.abs(element.currentTime - target) > 0.08) {
+        try { element.currentTime = target; } catch (err) { /* Wait until the media element is seekable. */ }
+      }
     }
+
+    // Ignore old metadata until the newly assigned source has loaded.
+    if (!sourceChanged) applyTime();
     if (state.playing && element.paused) {
       const p = element.play();
-      if (p && p.catch) p.catch(() => { /* autoplay may require gesture */ });
+      if (p && p.catch) p.catch(() => {
+        if (element === el.previewVideo && state.playing) showToast('Playback was blocked or the media format is unsupported', 'warning');
+      });
     }
     if (!state.playing && !element.paused) element.pause();
   }
@@ -1487,10 +1531,10 @@
       if (state.tracks.audio && state.tracks.audio.muted) el.previewAudio.muted = true;
     }
     if (vClip && state.tracks.video && state.tracks.video.muted) el.previewVideo.muted = true;
-    // CSS filters per active video/overlay clip; transition overlay applied on margins
+    // Apply transforms and filters to the currently visible primary media layer.
+    const visualTarget = previewStill && !previewStill.hidden ? previewStill : el.previewVideo;
     if (vClip && vClip.props) {
-      let filter = buildFilterCSS(vClip.props, vClip, t);
-      el.previewVideo.style.filter = filter || '';
+      visualTarget.style.filter = buildFilterCSS(vClip.props, vClip, t) || '';
 
       const ex = effectiveProp(vClip, 'x', t) || 0;
       const ey = effectiveProp(vClip, 'y', t) || 0;
@@ -1500,7 +1544,7 @@
       const baseOp = clamp((eop != null ? eop : 100) / 100, 0, 1) * fadeEnvelope(vClip, t);
       const tx = ex * 0.05;
       const ty = ey * 0.05;
-      el.previewVideo.style.transform = `translate(${clamp(tx, -50, 50)}%, ${clamp(ty, -50, 50)}%) scale(${clamp(esc / 100, 0, 10)}) rotate(${clamp(erot, -360, 360)}deg)`;
+      visualTarget.style.transform = `translate(${clamp(tx, -50, 50)}%, ${clamp(ty, -50, 50)}%) scale(${clamp(esc / 100, 0, 10)}) rotate(${clamp(erot, -360, 360)}deg)`;
 
       let op = 1;
       const tr = vClip.props.transition || { type: 'none', duration: 0 };
@@ -1509,16 +1553,17 @@
       if (tr.type === 'fadetoblack' && dur > 0) {
         if (local < dur) op = local / dur;
         else if (local > vClip.duration - dur) op = Math.max(0, (vClip.duration - local) / dur);
-      } else if (tr.type === 'fade' && dur > 0) {
-        if (local < dur) op = local / dur;
-      } else if (tr.type === 'crossfade' && dur > 0) {
-        if (local < dur) op = local / dur;
+      } else if ((tr.type === 'fade' || tr.type === 'crossfade') && dur > 0 && local < dur) {
+        op = local / dur;
       }
-      el.previewVideo.style.opacity = String(clamp(baseOp * op, 0, 1));
+      visualTarget.style.opacity = String(clamp(baseOp * op, 0, 1));
     } else {
-      el.previewVideo.style.filter = '';
-      el.previewVideo.style.opacity = '';
-      el.previewVideo.style.transform = '';
+      for (const target of [el.previewVideo, previewStill]) {
+        if (!target) continue;
+        target.style.filter = '';
+        target.style.opacity = '';
+        target.style.transform = '';
+      }
     }
   }
 
@@ -1737,15 +1782,25 @@
   // Wrap the video element and overlay in a sized frame so the aspect
   // control can letterbox without touching the HTML.
   let previewFrame = null;
+  let previewStill = null;
 
   function buildPreviewFrame() {
-    if (!el.previewStage || !el.previewVideo) return;
-    if (previewFrame) return;
+    if (!el.previewStage || !el.previewVideo || previewFrame) return;
     previewFrame = document.createElement('div');
     previewFrame.className = 'cutora-frame';
+    previewFrame.setAttribute('aria-label', 'Project preview frame');
+
+    previewStill = document.createElement('img');
+    previewStill.className = 'cutora-preview-still';
+    previewStill.alt = '';
+    previewStill.hidden = true;
+    previewStill.draggable = false;
+
     el.previewStage.insertBefore(previewFrame, el.previewVideo);
+    previewFrame.appendChild(previewStill);
     previewFrame.appendChild(el.previewVideo);
     if (el.previewOverlay) previewFrame.appendChild(el.previewOverlay);
+    previewFrame.style.aspectRatio = '16 / 9';
   }
 
   // ======================================================================
@@ -1754,9 +1809,13 @@
 
   function updatePreviewEmptyState() {
     if (!el.previewEmpty || !el.previewStage) return;
-    const hasContent = state.timelineDuration > 0 || state.clips.length > 0;
-    el.previewEmpty.hidden = hasContent;
-    if (previewFrame) previewFrame.style.visibility = hasContent ? 'visible' : 'hidden';
+    const hasVisualContent = state.clips.some((clip) => {
+      if (!clip || clip.missing || !['video', 'image', 'text'].includes(clip.type)) return false;
+      const track = state.tracks[clip.trackType];
+      return !track || (track.exists && !track.hidden);
+    });
+    el.previewEmpty.hidden = hasVisualContent;
+    if (previewFrame) previewFrame.style.visibility = hasVisualContent ? 'visible' : 'hidden';
   }
 
   // ======================================================================
