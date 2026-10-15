@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.0.1-64748b?style=flat-square" />
+  <img alt="Version" src="https://img.shields.io/badge/version-1.0.3-64748b?style=flat-square" />
   <img alt="Built with" src="https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JavaScript-f59e0b?style=flat-square" />
   <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" />
   <img alt="Status" src="https://img.shields.io/badge/status-early%20development-orange?style=flat-square" />
@@ -17,11 +17,16 @@
 
 ## About
 
-**CUTORA v1.0.1** is the first published development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
+**CUTORA v1.0.3** is the first published development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
 
 This is an **early development release**, not a production-ready editor. Development is ongoing, and some workflows may be incomplete or unreliable.
 
-## v1.0.1 update
+## v1.0.3 update
+
+- Fixed preview source switching so new videos wait for their own metadata before seeking.
+- Added a dedicated still-image layer for images placed on the primary video track.
+- Stabilized preview-frame sizing and overlay stacking.
+- Made the empty-preview state depend on visible visual clips rather than audio-only timeline content.
 
 - Fixed transport-button state updates when timeline duration changes.
 - Improved hidden-track playback handling and animated overlay refresh cadence.
@@ -95,11 +100,12 @@ CUTORA/
 
 ## Development status
 
-Version **1.0.1** is a starting point for continued development. The current focus is improving playback reliability, making the editing workflow easier to understand, and testing the existing features more thoroughly.
+Version **1.0.3** is a starting point for continued development. The current focus is improving playback reliability, making the editing workflow easier to understand, and testing the existing features more thoroughly.
 
 Known limitations include:
+- Full simultaneous compositing across multiple video tracks and true mixed-track audio rendering remain incomplete.
 
-- Playback controls and timeline synchronization still need further validation and refinement.
+- Browser-level playback validation is still required across supported video codecs and browsers.
 - Browser support for media formats and export codecs varies. MP4 output is not guaranteed; the actual format depends on what the browser supports.
 - Project JSON stores editing structure, but local media files may need to be selected again when reopening a project.
 - Large files and complex timelines may affect performance.
@@ -143,6 +149,6 @@ Created and maintained by **cyber-rover-ion**.
 ---
 
 <p align="center">
-  <strong>CUTORA v1.0.1</strong><br />
+  <strong>CUTORA v1.0.3</strong><br />
   An evolving experiment in browser-based video editing.
 </p>
