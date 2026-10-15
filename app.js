@@ -2638,7 +2638,7 @@
         && data.clips.every((c) => {
           if (!c || typeof c.id !== 'string' || typeof c.start !== 'number' || typeof c.duration !== 'number') return false;
           if (!isFinite(c.start) || !isFinite(c.duration) || c.start < 0 || c.duration <= 0) return false;
-          if (c.trackType && !/^(video|overlay|text|audio)(-\\d+)?$/.test(c.trackType)) return false;
+          if (c.trackType && !/^(video|overlay|text|audio)(-\d+)?$/.test(c.trackType)) return false;
           if (c.trackType && data.tracks && !Object.prototype.hasOwnProperty.call(data.tracks, c.trackType)
             && !TRACK_TYPES.includes(c.trackType)) return false;
           return true;
