@@ -2393,3 +2393,16 @@ kbd {
     scroll-behavior: auto !important;
   }
 }
+
+
+/* v1.0.1 — accessible transport and keyboard focus states */
+.playback-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+  filter: saturate(0.55);
+}
+
+:where(button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent, #8b7cff);
+  outline-offset: 2px;
+}
