@@ -2676,7 +2676,7 @@
       assetId: c.assetId || null,
       name: c.name || 'Clip',
       type: c.type || 'video',
-      trackType: (c.trackType && state.tracks[c.trackType]) ? c.trackType : (TRACK_TYPES.includes(c.trackType) ? c.trackType : 'video'),
+      trackType: (c.trackType && data.tracks && Object.prototype.hasOwnProperty.call(data.tracks, c.trackType)) ? c.trackType : (TRACK_TYPES.includes(c.trackType) ? c.trackType : 'video'),
       start: Math.max(0, c.start || 0),
       inPoint: Math.max(0, c.inPoint || 0),
       duration: Math.max(MIN_CLIP_DURATION, c.duration || MIN_CLIP_DURATION),
