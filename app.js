@@ -975,6 +975,7 @@
     }
     renderRuler();
     updateTimelineEmptyState();
+    updatePreviewEmptyState();
     updateClipPlayheadPosition();
     updatePlayPauseButton();
   }
@@ -1386,8 +1387,19 @@
     // Resolve the active clip only on an existing, visible track.
     for (const c of state.clips) {
       if (c.trackType !== trackType) continue;
-      const track = state.tracks[trackType];
+      const track = state.tracks[c.trackType];
       if (track && (!track.exists || track.hidden)) continue;
+      if (t >= c.start && t < c.start + c.duration) return c;
+    }
+    return null;
+  }
+
+  function activeHumanClipAtBaseType(baseType, t) {
+    // Resolve clips on the base track and any secondary tracks of that type.
+    for (const c of state.clips) {
+      if (getTrackBaseType(c.trackType) !== baseType) continue;
+      const track = state.tracks[c.trackType];
+      if (!track || !track.exists || track.hidden) continue;
       if (t >= c.start && t < c.start + c.duration) return c;
     }
     return null;
@@ -1395,16 +1407,13 @@
 
   function syncPlaybackToPlayhead() {
     const t = state.currentTime;
-    const videoClip = activeHumanClipAt('video', t);
-    const overlayMediaClip = !videoClip ? activeHumanClipAt('overlay', t) : null;
+    const videoClip = activeHumanClipAtBaseType('video', t);
+    const overlayMediaClip = !videoClip ? activeHumanClipAtBaseType('overlay', t) : null;
     const primary = videoClip || overlayMediaClip;
-    const audioClip = activeHumanClipAt('audio', t);
+    const audioClip = activeHumanClipAtBaseType('audio', t);
 
-    // Still images must not be assigned to a <video> element. Use a dedicated
-    // fitted image layer for images on the primary video track.
-    const primaryStill = primary && primary.type === 'image' && primary.trackType === 'video'
-      ? primary
-      : null;
+    // Render stills on either the primary video track or an overlay track.
+    const primaryStill = primary && primary.type === 'image' ? primary : null;
     syncPreviewStill(primaryStill);
     syncMediaElement(el.previewVideo, primary && primary.type === 'video' ? primary : null, t);
     syncMediaElement(el.previewAudio, audioClip, t);
@@ -1433,7 +1442,9 @@
 
   function syncMediaElement(element, clip, t) {
     if (!element) return;
-    if (!clip || clip.type !== 'video' || clip.missing || !clip.assetId) {
+    const isAudioElement = element === el.previewAudio;
+    const expectedType = isAudioElement ? 'audio' : 'video';
+    if (!clip || clip.type !== expectedType || clip.missing || !clip.assetId) {
       if (!element.paused) element.pause();
       if (element.hasAttribute('data-cutora-src')) {
         element.removeAttribute('data-cutora-src');
@@ -1442,13 +1453,14 @@
       }
       return;
     }
+
     const asset = assetById(clip.assetId);
     if (!asset || asset.missing || !asset.url) {
       if (!element.paused) element.pause();
       return;
     }
 
-    const speed = clamp(clip.props.speed || 1, 0.25, 4);
+    const speed = clamp(clip.props && clip.props.speed || 1, 0.25, 4);
     const localTime = clip.inPoint + Math.max(0, t - clip.start) * speed;
     const sourceChanged = element.getAttribute('data-cutora-src') !== asset.url;
 
@@ -1457,23 +1469,29 @@
       element.dataset.cutoraLoadingSrc = asset.url;
       element.src = asset.url;
       const sourceForListener = asset.url;
-      element.addEventListener('loadedmetadata', () => {
+      const onReady = () => {
         if (element.getAttribute('data-cutora-src') !== sourceForListener) return;
         delete element.dataset.cutoraLoadingSrc;
-        applyTime();
-      }, { once: true });
+        applyTime(true);
+      };
+      element.addEventListener('loadedmetadata', onReady, { once: true });
+      element.addEventListener('canplay', onReady, { once: true });
       element.addEventListener('error', () => {
         if (element.getAttribute('data-cutora-src') !== sourceForListener) return;
         delete element.dataset.cutoraLoadingSrc;
         if (element === el.previewVideo) showToast('This video format could not be decoded by your browser', 'error');
       }, { once: true });
+      // Explicitly request buffering; metadata alone may not be enough to paint a frame.
+      try { element.load(); } catch (err) { /* The browser will continue loading the assigned source. */ }
     }
 
-    function applyTime() {
+    function applyTime(force = false) {
       if (element.getAttribute('data-cutora-src') !== asset.url || element.dataset.cutoraLoadingSrc === asset.url) return;
       if (element.readyState < 1 || !isFinite(element.duration) || element.duration <= 0) return;
       const target = clamp(localTime, 0, Math.max(0, element.duration - 0.01));
-      if (Math.abs(element.currentTime - target) > 0.08) {
+      const drift = Math.abs(element.currentTime - target);
+      const threshold = state.playing ? 0.08 : 0.001;
+      if (force || drift > threshold) {
         try { element.currentTime = target; } catch (err) { /* Wait until the media element is seekable. */ }
       }
     }
@@ -1493,7 +1511,7 @@
     // Volume + fades for the preview video element
     if (!el.previewVideo) return;
     const t = state.currentTime;
-    const vClip = activeHumanClipAt('video', t) || activeHumanClipAt('overlay', t);
+    const vClip = activeHumanClipAtBaseType('video', t) || activeHumanClipAtBaseType('overlay', t);
     let vol = state.muted ? 0 : state.volume;
     if (vClip) {
       const p = vClip.props || {};
@@ -1513,7 +1531,7 @@
 
     if (el.previewAudio) {
       let aVol = state.muted ? 0 : state.volume;
-      const aClip = activeHumanClipAt('audio', t);
+      const aClip = activeHumanClipAtBaseType('audio', t);
       if (aClip) {
         const p = aClip.props || {};
         const eVol = effectiveProp(aClip, 'volume', t);
@@ -3389,8 +3407,7 @@
     initVideoEvents();
     initDragDrop();
     initPropertiesPanel();
-    initPropControls();
-    initAssetRemoveOption();
+    // Do not call legacy property helpers that are not defined in this build.
     addTransitionControl();
     tryRecoverOnBoot();
 
