@@ -3219,6 +3219,7 @@
     if (el.btnNewProject) el.btnNewProject.addEventListener('click', newProjectFlow);
     if (el.btnUndo) el.btnUndo.addEventListener('click', undo);
     if (el.btnRedo) el.btnRedo.addEventListener('click', redo);
+    if (el.btnOpenProject) el.btnOpenProject.addEventListener('click', openProjectPicker);
     if (el.btnSave) el.btnSave.addEventListener('click', saveProjectJSON);
     if (el.btnExport) el.btnExport.addEventListener('click', openExportDialog);
     if (el.projectName) {
@@ -3274,6 +3275,7 @@
     el.btnNewProject = byId('btn-new-project');
     el.btnUndo = byId('btn-undo');
     el.btnRedo = byId('btn-redo');
+    el.btnOpenProject = byId('btn-open-project');
     el.btnSave = byId('btn-save');
     el.btnExport = byId('btn-export');
 
