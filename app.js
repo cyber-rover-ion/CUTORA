@@ -1365,10 +1365,8 @@
 
     updateClipPlayheadPosition();
     syncPlaybackToPlayhead();
-    renderOverlaysForTime();
     updateTimeDisplay();
     updateSeekSlider();
-    applyActiveClipProcessing();
 
     rafId = requestAnimationFrame(tick);
   }
@@ -1632,49 +1630,54 @@
     if (!el.previewOverlay) return;
     const t = state.currentTime;
     const wanted = [];
-
     for (const trackType of ['overlay', 'text']) {
       const c = activeClipAt(trackType, t);
       if (c) wanted.push(c);
     }
 
-    // Reconcile DOM: rebuild only when the active set changes
-    const sig = wanted.map((c) => `${c.id}:${Math.round((t - c.start) * 30)}`).join('|');
-    if (el.previewOverlay.dataset.sig === sig) return;
-    el.previewOverlay.dataset.sig = sig;
-    el.previewOverlay.innerHTML = '';
-
-    for (const clip of wanted) {
-      const p = clip.props || {};
-      const item = document.createElement('div');
-      item.className = 'cutora-overlay-item';
-
-      if (clip.type === 'image') {
-        const asset = assetById(clip.assetId);
-        if (asset && !asset.missing) {
-          const img = document.createElement('img');
-          img.src = asset.url;
-          img.alt = '';
-          item.appendChild(img);
+    // Rebuild DOM only when active clips change, not on every animation frame.
+    const sig = wanted.map((c) => c.id).join('|');
+    if (el.previewOverlay.dataset.sig !== sig) {
+      el.previewOverlay.dataset.sig = sig;
+      el.previewOverlay.replaceChildren();
+      for (const clip of wanted) {
+        if (clip.type === 'video') continue;
+        const item = document.createElement('div');
+        item.className = 'cutora-overlay-item';
+        item.dataset.clipId = clip.id;
+        if (clip.type === 'image') {
+          const asset = assetById(clip.assetId);
+          if (asset && !asset.missing && asset.url) {
+            const img = document.createElement('img');
+            img.src = asset.url;
+            img.alt = '';
+            img.decoding = 'async';
+            item.appendChild(img);
+          }
+        } else if (clip.type === 'text') {
+          item.appendChild(document.createElement('div'));
         }
-      } else if (clip.type === 'text') {
-        const span = document.createElement('div');
-        span.textContent = p.content || '';
-        span.style.color = p.color || '#ffffff';
-        span.style.fontSize = `${clamp(p.fontSize || 48, 8, 400)}px`;
-        span.style.fontWeight = '600';
-        span.style.fontFamily = 'var(--font-stack)';
-        span.style.textShadow = '0 2px 8px rgba(0,0,0,.55)';
-        span.style.textAlign = p.align || 'center';
-        item.appendChild(span);
-      } else if (clip.type === 'video') {
-        // Video clips on the overlay track are handled by the main video
-        // element only when on the primary path; secondary video overlays
-        // would need a second video element — unsupported, skip visually.
-        continue;
+        el.previewOverlay.appendChild(item);
       }
+    }
 
-      // Effective (keyframed) transform + opacity
+    // Update animated properties in-place without allocating new DOM nodes.
+    for (const clip of wanted) {
+      const item = el.previewOverlay.querySelector('[data-clip-id="' + clip.id + '"]');
+      if (!item) continue;
+      const p = clip.props || {};
+      if (clip.type === 'text') {
+        const span = item.firstElementChild;
+        if (span) {
+          span.textContent = p.content || '';
+          span.style.color = p.color || '#ffffff';
+          span.style.fontSize = `${clamp(p.fontSize || 48, 8, 400)}px`;
+          span.style.fontWeight = '600';
+          span.style.fontFamily = 'var(--font-stack)';
+          span.style.textShadow = '0 2px 8px rgba(0,0,0,.55)';
+          span.style.textAlign = p.align || 'center';
+        }
+      }
       const ex = effectiveProp(clip, 'x', t) || 0;
       const ey = effectiveProp(clip, 'y', t) || 0;
       const esc = effectiveProp(clip, 'scale', t) || 100;
@@ -1682,14 +1685,10 @@
       const eop = effectiveProp(clip, 'opacity', t);
       const opacity = clamp((eop != null ? eop : 100) / 100, 0, 1) * fadeEnvelope(clip, t);
       item.style.opacity = String(clamp(opacity, 0, 1));
-      const filter = buildFilterCSS(p, clip, t);
-      item.style.filter = filter || '';
-      const tx = ex * 0.05; // property units → % of frame (visual approximation)
-      const ty = ey * 0.05;
-      item.style.left = `${50 + clamp(tx, -50, 50)}%`;
-      item.style.top = `${50 + clamp(ty, -50, 50)}%`;
+      item.style.filter = buildFilterCSS(p, clip, t) || '';
+      item.style.left = `${50 + clamp(ex * 0.05, -50, 50)}%`;
+      item.style.top = `${50 + clamp(ey * 0.05, -50, 50)}%`;
       item.style.transform = `translate(-50%,-50%) scale(${clamp(esc / 100, 0, 10)}) rotate(${clamp(erot, -360, 360)}deg)`;
-      el.previewOverlay.appendChild(item);
     }
   }
 
