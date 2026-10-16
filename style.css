@@ -57,11 +57,11 @@ select {
   --glass-highlight: rgba(255, 255, 255, 0.05);
 
   /* Accents */
-  --accent: #3fd6e0;
-  --accent-strong: #25c2ce;
-  --accent-soft: rgba(63, 214, 224, 0.14);
-  --accent-violet: #8b7cf6;
-  --accent-violet-soft: rgba(139, 124, 246, 0.16);
+  --accent: #9b8cff;
+  --accent-strong: #b1a4ff;
+  --accent-soft: rgba(155, 140, 255, 0.18);
+  --accent-violet: #d18bff;
+  --accent-violet-soft: rgba(209, 139, 255, 0.16);
 
   /* Text */
   --text-primary: #eef1f5;
@@ -2450,3 +2450,100 @@ kbd {
   overflow: hidden;
   pointer-events: none;
 }
+
+
+/* v1.0.5 — richer colour system and clearer interaction states */
+:root {
+  --accent-blue: #68a9ff;
+  --accent-pink: #ff7eb6;
+  --accent-mint: #5ee1c0;
+  --accent-amber: #ffc66d;
+}
+
+.topbar {
+  background:
+    linear-gradient(105deg, rgba(106, 85, 214, 0.13), transparent 34%),
+    var(--glass-bg-strong);
+  border-bottom-color: rgba(155, 140, 255, 0.22);
+}
+
+.brand-mark,
+.logo-mark {
+  box-shadow: 0 0 22px rgba(155, 140, 255, 0.22);
+}
+
+.topbar-btn:hover:not(:disabled),
+.playback-btn:hover:not(:disabled),
+.volume-btn:hover:not(:disabled),
+.fullscreen-btn:hover:not(:disabled),
+.timeline-zoom-btn:hover:not(:disabled) {
+  border-color: rgba(155, 140, 255, 0.48);
+  background: rgba(155, 140, 255, 0.13);
+  box-shadow: 0 0 0 1px rgba(155, 140, 255, 0.08);
+}
+
+.topbar-btn-primary,
+.dialog-btn--primary {
+  background: linear-gradient(120deg, #8d7cff, #b17bfa);
+  border-color: rgba(220, 211, 255, 0.2);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(141, 124, 255, 0.22);
+}
+
+.topbar-btn-primary:hover:not(:disabled),
+.dialog-btn--primary:hover:not(:disabled) {
+  background: linear-gradient(120deg, #a092ff, #c08cff);
+  box-shadow: 0 5px 20px rgba(141, 124, 255, 0.3);
+}
+
+.side-panel-tab--active {
+  color: #d9d2ff;
+  background: linear-gradient(120deg, rgba(155, 140, 255, 0.18), rgba(104, 169, 255, 0.08));
+  box-shadow: inset 0 -2px 0 #a99aff;
+}
+
+.panel-import-btn:hover:not(:disabled),
+.timeline-add-btn:hover:not(:disabled) {
+  color: #ded8ff;
+  border-color: rgba(155, 140, 255, 0.42);
+  background: rgba(155, 140, 255, 0.1);
+}
+
+.timeline-add-btn:nth-of-type(4n + 1) svg { color: var(--accent-blue); }
+.timeline-add-btn:nth-of-type(4n + 2) svg { color: var(--accent-pink); }
+.timeline-add-btn:nth-of-type(4n + 3) svg { color: var(--accent-mint); }
+.timeline-add-btn:nth-of-type(4n + 4) svg { color: var(--accent-amber); }
+
+.clip {
+  border-color: rgba(155, 140, 255, 0.45);
+  background-image: linear-gradient(120deg, rgba(155, 140, 255, 0.28), rgba(104, 169, 255, 0.16));
+}
+
+.clip[data-type="video"] { background-image: linear-gradient(120deg, rgba(104, 169, 255, 0.32), rgba(77, 126, 235, 0.18)); }
+.clip[data-type="image"] { background-image: linear-gradient(120deg, rgba(255, 126, 182, 0.3), rgba(209, 139, 255, 0.18)); }
+.clip[data-type="audio"] { background-image: linear-gradient(120deg, rgba(94, 225, 192, 0.3), rgba(48, 164, 146, 0.18)); }
+.clip[data-type="text"] { background-image: linear-gradient(120deg, rgba(255, 198, 109, 0.3), rgba(255, 143, 90, 0.16)); }
+
+.clip.selected,
+.clip.is-selected {
+  border-color: #c2b7ff;
+  box-shadow: 0 0 0 1px rgba(194, 183, 255, 0.38), 0 0 18px rgba(155, 140, 255, 0.16);
+}
+
+.timeline-playhead,
+.playhead-line,
+.playhead-head {
+  background-color: #ff7eb6;
+}
+
+:where(button, input, select, textarea, [tabindex]):focus-visible {
+  outline-color: #c0b4ff;
+}
+
+.toast {
+  border-left-color: #9b8cff;
+}
+
+.toast[data-type="success"] { border-left-color: var(--accent-mint); }
+.toast[data-type="error"] { border-left-color: #ff737d; }
+.toast[data-type="warning"] { border-left-color: var(--accent-amber); }
