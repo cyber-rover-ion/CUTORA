@@ -7,21 +7,32 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.0.5-64748b?style=flat-square" />
+  <img alt="Version" src="https://img.shields.io/badge/version-1.0.6-64748b?style=flat-square" />
   <img alt="Built with" src="https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JavaScript-f59e0b?style=flat-square" />
   <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" />
   <img alt="Status" src="https://img.shields.io/badge/status-early%20development-orange?style=flat-square" />
+</p>
+
+<p align="center">
+  <a href="https://cutora-ten.vercel.app"><strong>▶ Open CUTORA — Use the live editor</strong></a>
+  &nbsp; · &nbsp;
+  <a href="https://github.com/cyber-rover-ion/CUTORA">View source on GitHub</a>
 </p>
 
 ---
 
 ## About
 
-**CUTORA v1.0.5** is the first published development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
+**CUTORA v1.0.6** is the first published development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
 
 This is an **early development release**, not a production-ready editor. Development is ongoing, and some workflows may be incomplete or unreliable.
 
-## v1.0.5 update
+## v1.0.6 update
+
+- Added a prominent live-editor link at the top of the README and in the app toolbar: [cutora-ten.vercel.app](https://cutora-ten.vercel.app).
+- Reduced preview overhead by avoiding repeated overlay DOM rebuilds during playback and removing duplicate per-frame processing calls.
+- Improved phone and small-screen layouts with stacked editor panels, larger touch targets, a compact toolbar, and a scrollable timeline.
+
 
 - Fixed the Open Project toolbar button so it opens the project-file picker, matching the Ctrl+O shortcut.
 - Refreshed the interface with a violet/blue accent palette, clearer active states, and more colourful clip-type styling.
@@ -107,7 +118,7 @@ CUTORA/
 
 ## Development status
 
-Version **1.0.5** continues development with targeted preview and initialization fixes. The current focus is improving playback reliability, making the editing workflow easier to understand, and testing the existing features more thoroughly.
+Version **1.0.6** continues development with targeted preview and initialization fixes. The current focus is improving playback reliability, making the editing workflow easier to understand, and testing the existing features more thoroughly.
 
 Known limitations include:
 - Full simultaneous compositing across multiple video tracks and true mixed-track audio rendering remain incomplete.
@@ -156,6 +167,6 @@ Created and maintained by **cyber-rover-ion**.
 ---
 
 <p align="center">
-  <strong>CUTORA v1.0.5</strong><br />
+  <strong>CUTORA v1.0.6</strong><br />
   An evolving experiment in browser-based video editing.
 </p>
