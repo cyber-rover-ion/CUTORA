@@ -2668,3 +2668,176 @@ kbd {
 }
 .cutora-overlay-item[data-clip-id] { -webkit-user-select: none; user-select: none; }
 .cutora-overlay-item[data-clip-id] > div { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+
+/* v1.0.9 — mobile layout hardening */
+@media (max-width: 720px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  body {
+    min-width: 0;
+    height: auto;
+    min-height: 100dvh;
+  }
+
+  #topbar,
+  .editor-layout,
+  .preview-area,
+  .side-panel,
+  .timeline,
+  .timeline-top,
+  .preview-controls {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .editor-layout {
+    width: 100%;
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .preview-area {
+    flex: 0 0 auto;
+    height: auto;
+  }
+
+  .preview-stage {
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    padding: 8px;
+    overflow: hidden;
+  }
+
+  .cutora-frame {
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    flex: 0 1 auto;
+  }
+
+  .preview-controls,
+  .playback-row,
+  .playback-row--secondary {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .playback-row > *,
+  .playback-row--secondary > * {
+    min-width: 0;
+  }
+
+  .side-panel--left,
+  .side-panel--right {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .side-panel-content {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .media-library {
+    grid-template-columns: repeat(auto-fill, minmax(min(105px, 42vw), 1fr));
+  }
+
+  .timeline {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .timeline-top {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .timeline-info,
+  .timeline-controls,
+  .timeline-add-tracks {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .timeline-scroll {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+  }
+
+  .timeline-ruler,
+  .timeline-tracks {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .side-panel--right {
+    position: static;
+    inset: auto;
+    transform: none;
+  }
+
+  .dialog,
+  .dialog-content,
+  .dialog-panel {
+    max-width: calc(100vw - 20px);
+    min-width: 0;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  :root {
+    --track-header-w: 88px;
+    --track-h: 46px;
+  }
+
+  #topbar {
+    padding-inline: 6px;
+  }
+
+  .topbar-actions {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .preview-controls {
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .time-display {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .timeline-top {
+    padding: 7px;
+  }
+
+  .timeline-label,
+  .timeline-duration {
+    overflow-wrap: anywhere;
+  }
+}
