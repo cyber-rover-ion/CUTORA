@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.0.6-64748b?style=flat-square" />
+  <img alt="Version" src="https://img.shields.io/badge/version-1.0.9-64748b?style=flat-square" />
   <img alt="Built with" src="https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JavaScript-f59e0b?style=flat-square" />
   <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" />
   <img alt="Status" src="https://img.shields.io/badge/status-early%20development-orange?style=flat-square" />
@@ -23,11 +23,11 @@
 
 ## About
 
-**CUTORA v1.0.6** is the first published development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
+**CUTORA v1.0.9** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
 
 This is an **early development release**, not a production-ready editor. Development is ongoing, and some workflows may be incomplete or unreliable.
 
-## v1.0.6 update
+## v1.0.9 update
 
 - Added a prominent live-editor link at the top of the README and in the app toolbar: [cutora-ten.vercel.app](https://cutora-ten.vercel.app).
 - Reduced preview overhead by avoiding repeated overlay DOM rebuilds during playback and removing duplicate per-frame processing calls.
@@ -38,6 +38,15 @@ This is an **early development release**, not a production-ready editor. Develop
 - Refreshed the interface with a violet/blue accent palette, clearer active states, and more colourful clip-type styling.
 - Added more visible hover and keyboard-focus feedback for common controls.
 - Kept the existing HTML/CSS/JavaScript architecture and the timeline/preview repair work from v1.0.4.
+
+### v1.0.9 improvements
+
+- Improved track mute and lock state handling, with clearer visual feedback for muted and locked tracks.
+- Added direct preview text repositioning and improved text-size scaling relative to the preview frame.
+- Improved export compositing for active image and text overlays across overlay/text tracks, and cached image objects between export frames.
+- Reduced playback timeline-UI update frequency while retaining per-animation-frame media synchronization.
+- Added a best-effort 120 FPS export option; actual capture frame rate depends on browser and device performance.
+- Hardened small-screen layout rules for preview sizing, wrapping controls, side panels, and touch-scrollable timelines.
 
 ## Previous v1.0.3 update
 
@@ -118,10 +127,12 @@ CUTORA/
 
 ## Development status
 
-Version **1.0.6** continues development with targeted preview and initialization fixes. The current focus is improving playback reliability, making the editing workflow easier to understand, and testing the existing features more thoroughly.
+Version **1.0.9** includes targeted track-control, export-rendering, playback-performance, and mobile-layout improvements. It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
 
 Known limitations include:
-- Full simultaneous compositing across multiple video tracks and true mixed-track audio rendering remain incomplete.
+- Export does not yet mix audio tracks into the rendered file; audio mixing remains incomplete.
+- Export uses real-time browser capture. A requested 120 FPS setting is best-effort and does not guarantee 120 encoded frames per second.
+- Full simultaneous compositing of multiple video tracks remains incomplete.
 
 - Browser-level playback validation is still required across supported video codecs and browsers.
 - Browser support for media formats and export codecs varies. MP4 output is not guaranteed; the actual format depends on what the browser supports.
@@ -167,6 +178,6 @@ Created and maintained by **cyber-rover-ion**.
 ---
 
 <p align="center">
-  <strong>CUTORA v1.0.6</strong><br />
+  <strong>CUTORA v1.0.9</strong><br />
   An evolving experiment in browser-based video editing.
 </p>
