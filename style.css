@@ -2097,6 +2097,13 @@ input[type="number"].properties-input {
   max-width: 100%;
 }
 
+.export-hint {
+  color: var(--text-tertiary);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
 /* ----- Shortcuts dialog ----- */
 .shortcuts-grid {
   display: grid;
