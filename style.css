@@ -2646,3 +2646,18 @@ kbd {
   .timeline-info { flex-direction: row; align-items: center; }
   .timeline-label, .timeline-duration { font-size: 10px; }
 }
+
+
+/* v1.0.7 — clear track lock/mute states and draggable preview text */
+.timeline-track.is-locked .track-btn--lock,
+.timeline-track .track-btn--lock.is-active {
+  color: var(--accent-amber, #ffc66d);
+  background: rgba(255, 198, 109, 0.12);
+}
+.timeline-track.is-muted .track-btn--mute,
+.timeline-track .track-btn--mute.is-active {
+  color: var(--accent-pink, #ff7eb6);
+  background: rgba(255, 126, 182, 0.12);
+}
+.cutora-overlay-item[data-clip-id] { -webkit-user-select: none; user-select: none; }
+.cutora-overlay-item[data-clip-id] > div { white-space: pre-wrap; overflow-wrap: anywhere; }
