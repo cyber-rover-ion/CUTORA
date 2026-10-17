@@ -1525,11 +1525,13 @@
       }
     }
     el.previewVideo.volume = clamp(vol, 0, 1);
-    el.previewVideo.muted = state.muted;
+    const videoTrackState = vClip && state.tracks[vClip.trackType];
+    el.previewVideo.muted = state.muted || !!(videoTrackState && videoTrackState.muted);
 
     if (el.previewAudio) {
       let aVol = state.muted ? 0 : state.volume;
       const aClip = activeHumanClipAtBaseType('audio', t);
+      const audioTrackState = aClip && state.tracks[aClip.trackType];
       if (aClip) {
         const p = aClip.props || {};
         const eVol = effectiveProp(aClip, 'volume', t);
@@ -1543,10 +1545,8 @@
         }
       }
       el.previewAudio.volume = clamp(aVol, 0, 1);
-      el.previewAudio.muted = state.muted;
-      if (state.tracks.audio && state.tracks.audio.muted) el.previewAudio.muted = true;
+      el.previewAudio.muted = state.muted || !!(audioTrackState && audioTrackState.muted);
     }
-    if (vClip && state.tracks.video && state.tracks.video.muted) el.previewVideo.muted = true;
     // Apply transforms and filters to the currently visible primary media layer.
     const visualTarget = previewStill && !previewStill.hidden ? previewStill : el.previewVideo;
     if (vClip && vClip.props) {
@@ -1626,6 +1626,56 @@
   // SECTION: Overlay rendering (text/image) in the preview
   // ======================================================================
 
+  const overlayDrag = { active: false, clipId: null, startX: 0, startY: 0, startPropX: 0, startPropY: 0, width: 0, height: 0, before: null };
+
+  function beginTextOverlayDrag(event, clipId) {
+    if (event.button !== 0 || event.isPrimary === false) return;
+    const clip = clipById(clipId);
+    if (!clip || clip.type !== 'text') return;
+    const track = state.tracks[clip.trackType];
+    if (track && track.locked) {
+      showToast('Track is locked — unlock it to move text');
+      event.preventDefault();
+      return;
+    }
+    const bounds = el.previewOverlay.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+    selectClip(clipId);
+    overlayDrag.active = true;
+    overlayDrag.clipId = clipId;
+    overlayDrag.startX = event.clientX;
+    overlayDrag.startY = event.clientY;
+    overlayDrag.startPropX = Number(clip.props.x) || 0;
+    overlayDrag.startPropY = Number(clip.props.y) || 0;
+    overlayDrag.width = bounds.width;
+    overlayDrag.height = bounds.height;
+    overlayDrag.before = snapshot();
+    event.preventDefault();
+    event.stopPropagation();
+    const move = (ev) => {
+      if (!overlayDrag.active || overlayDrag.clipId !== clipId) return;
+      const current = clipById(clipId);
+      if (!current) return;
+      current.props.x = clamp(overlayDrag.startPropX + (ev.clientX - overlayDrag.startX) * 2000 / overlayDrag.width, -4000, 4000);
+      current.props.y = clamp(overlayDrag.startPropY + (ev.clientY - overlayDrag.startY) * 2000 / overlayDrag.height, -4000, 4000);
+      renderOverlaysForTime();
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      if (!overlayDrag.active || overlayDrag.clipId !== clipId) return;
+      overlayDrag.active = false;
+      overlayDrag.clipId = null;
+      const before = overlayDrag.before;
+      overlayDrag.before = null;
+      if (before) commitChange(before, 'text overlay moved');
+      refreshPropertiesPanel();
+      markDirty();
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up, { once: true });
+  }
+
   function renderOverlaysForTime() {
     if (!el.previewOverlay) return;
     const t = state.currentTime;
@@ -1656,6 +1706,10 @@
           }
         } else if (clip.type === 'text') {
           item.appendChild(document.createElement('div'));
+          item.addEventListener('pointerdown', (event) => beginTextOverlayDrag(event, clip.id));
+          item.setAttribute('role', 'button');
+          item.setAttribute('aria-label', 'Drag text overlay to reposition');
+          item.title = 'Drag to reposition text';
         }
         el.previewOverlay.appendChild(item);
       }
@@ -1667,11 +1721,18 @@
       if (!item) continue;
       const p = clip.props || {};
       if (clip.type === 'text') {
+        const track = state.tracks[clip.trackType];
+        item.style.pointerEvents = track && track.locked ? 'none' : 'auto';
+        item.style.cursor = track && track.locked ? 'not-allowed' : 'grab';
+        item.style.touchAction = 'none';
+        item.style.userSelect = 'none';
         const span = item.firstElementChild;
         if (span) {
           span.textContent = p.content || '';
           span.style.color = p.color || '#ffffff';
-          span.style.fontSize = `${clamp(p.fontSize || 48, 8, 400)}px`;
+          // Match the 1080p-relative typography scale used by the export renderer.
+          const frameHeight = el.previewOverlay.clientHeight || 1080;
+          span.style.fontSize = `${clamp(p.fontSize || 48, 8, 400) * frameHeight / 1080}px`;
           span.style.fontWeight = '600';
           span.style.fontFamily = 'var(--font-stack)';
           span.style.textShadow = '0 2px 8px rgba(0,0,0,.55)';
@@ -2219,15 +2280,29 @@
       const track = getTrackElement(trackId);
       const ts = state.tracks[trackId];
       if (!track || !ts) continue;
-      track.style.opacity = ts.hidden ? '0.35' : '';
+      track.style.opacity = ts.hidden ? '0.55' : '';
+      track.classList.toggle('is-locked', !!ts.locked);
+      track.classList.toggle('is-muted', !!ts.muted);
       const vis = track.querySelector('.track-btn--visibility');
       const mute = track.querySelector('.track-btn--mute');
       const lock = track.querySelector('.track-btn--lock');
-      if (vis) vis.setAttribute('aria-pressed', ts.hidden ? 'false' : 'true');
-      if (mute) mute.setAttribute('aria-pressed', ts.muted ? 'true' : 'false');
-      if (lock) lock.setAttribute('aria-pressed', ts.locked ? 'true' : 'false');
+      if (vis) {
+        vis.setAttribute('aria-pressed', ts.hidden ? 'false' : 'true');
+        vis.title = ts.hidden ? 'Show track' : 'Hide track';
+      }
+      if (mute) {
+        mute.setAttribute('aria-pressed', ts.muted ? 'true' : 'false');
+        mute.classList.toggle('is-active', !!ts.muted);
+        mute.title = ts.muted ? 'Unmute track' : 'Mute track';
+      }
+      if (lock) {
+        lock.setAttribute('aria-pressed', ts.locked ? 'true' : 'false');
+        lock.classList.toggle('is-active', !!ts.locked);
+        lock.title = ts.locked ? 'Unlock track' : 'Lock track';
+      }
+      // Keep clips selectable on locked tracks; onClipPointerDown blocks edits.
       const content = track.querySelector('.track-content');
-      if (content) content.style.pointerEvents = ts.locked ? 'none' : '';
+      if (content) content.style.pointerEvents = '';
     }
   }
 
