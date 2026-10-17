@@ -1690,9 +1690,22 @@
     if (!el.previewOverlay) return;
     const t = state.currentTime;
     const wanted = [];
-    for (const trackType of ['overlay', 'text']) {
-      const c = activeClipAt(trackType, t);
-      if (c) wanted.push(c);
+    const primaryVideoClip = activeHumanClipAtBaseType('video', t);
+    const primaryOverlayClip = !primaryVideoClip ? activeHumanClipAtBaseType('overlay', t) : null;
+    const primaryClip = primaryVideoClip || primaryOverlayClip;
+
+    // Collect every active overlay image and text clip, including secondary tracks.
+    // The primary still image is already rendered by the dedicated preview image layer.
+    for (const clip of state.clips) {
+      const baseType = getTrackBaseType(clip.trackType);
+      if (clip.type === 'text' && baseType !== 'text') continue;
+      if (clip.type === 'image' && baseType !== 'overlay') continue;
+      if (clip.type !== 'text' && clip.type !== 'image') continue;
+      const track = state.tracks[clip.trackType];
+      if (!track || !track.exists || track.hidden) continue;
+      if (t < clip.start || t >= clip.start + clip.duration) continue;
+      if (clip.type === 'image' && primaryClip && primaryClip.id === clip.id) continue;
+      wanted.push(clip);
     }
 
     // Rebuild DOM only when active clips change, not on every animation frame.
@@ -3093,7 +3106,8 @@
     }
   }
 
-  function openExportDialog() {      if (state.timelineDuration <= 0) {
+  function openExportDialog() {
+    if (state.timelineDuration <= 0) {
       showToast('Nothing to export — the timeline is empty', 'error');
       return;
     }
@@ -3107,7 +3121,9 @@
     }
     if (el.dialogExport) openDialog(el.dialogExport);
     else showToast('Export dialog is not available in this build', 'error', 6000);
-  }  function startExport() {
+  }
+
+  function startExport() {
     if (exportState.running) return;
     const duration = state.timelineDuration;
     const [rw, rh] = (el.exportResolution ? el.exportResolution.value : '1920x1080').split('x').map((n) => parseInt(n, 10));
@@ -3145,6 +3161,9 @@
       recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bits });
     } catch (err) {
       exportState.running = false;
+      stream.getTracks().forEach((track) => track.stop());
+      exportState.stream = null;
+      exportState.canvas = null;
       showToast(`Export failed to start: ${err.message || 'recorder error'}`, 'error', 6000);
       return;
     }
@@ -3170,7 +3189,8 @@
       try {
         const blob = new Blob(chunks, { type: mimeType });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');          const safeName = String(state.projectName || 'export').replace(/[^a-z0-9_-]+/gi, '_').slice(0, 60) || 'export';
+        const a = document.createElement('a');
+        const safeName = String(state.projectName || 'export').replace(/[^a-z0-9_-]+/gi, '_').slice(0, 60) || 'export';
         a.href = url;
         a.download = `${safeName}.${ext}`;
         document.body.appendChild(a);
@@ -3214,7 +3234,9 @@
     drawSceneToCanvas(ctx, 0, W, H);
     requestAnimationFrame(step);
     showToast('Export started — playback runs in real time; keep this tab visible', 'info', 5000);
-  }  function cleanupExport(prevTime, wasPlaying) {
+  }
+
+  function cleanupExport(prevTime, wasPlaying) {
     exportState.running = false;
     if (exportState.stream) {
       exportState.stream.getTracks().forEach((t) => t.stop());
