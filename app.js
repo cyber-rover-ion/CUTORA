@@ -1311,6 +1311,10 @@
 
   let rafId = 0;
   let lastTickTime = 0;
+  // Keep media/overlay playback synced on every animation frame, but update
+  // timeline chrome at a bounded rate to reduce layout work on large projects.
+  let lastPlaybackUiUpdate = 0;
+  const PLAYBACK_UI_INTERVAL_MS = 1000 / 30;
 
   function togglePlayPause() {
     if (state.playing) {
@@ -1330,6 +1334,7 @@
     }
     state.playing = true;
     lastTickTime = performance.now();
+    lastPlaybackUiUpdate = 0;
     updatePlayPauseButton();
     syncPlaybackToPlayhead();
     cancelAnimationFrame(rafId);
@@ -1363,10 +1368,15 @@
       return;
     }
 
-    updateClipPlayheadPosition();
+    // Keep media playback and animated overlays responsive at display refresh
+    // rate, while throttling timeline DOM updates to about 30 Hz.
     syncPlaybackToPlayhead();
-    updateTimeDisplay();
-    updateSeekSlider();
+    if (now - lastPlaybackUiUpdate >= PLAYBACK_UI_INTERVAL_MS) {
+      lastPlaybackUiUpdate = now;
+      updateClipPlayheadPosition();
+      updateTimeDisplay();
+      updateSeekSlider();
+    }
 
     rafId = requestAnimationFrame(tick);
   }
@@ -3103,7 +3113,7 @@
     const [rw, rh] = (el.exportResolution ? el.exportResolution.value : '1920x1080').split('x').map((n) => parseInt(n, 10));
     const W = clamp(rw || 1920, 16, 4096);
     const H = clamp(rh || 1080, 16, 4096);
-    const fps = clamp(parseInt(el.exportFramerate ? el.exportFramerate.value : '30', 10) || 30, 1, 60);
+    const fps = clamp(parseInt(el.exportFramerate ? el.exportFramerate.value : '30', 10) || 30, 1, 120);
     const quality = el.exportQuality ? el.exportQuality.value : 'medium';
     const bits = { high: 12e6, medium: 8e6, low: 4e6 }[quality] || 8e6;
     
