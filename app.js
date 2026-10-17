@@ -2961,6 +2961,10 @@
     return null;
   }
 
+  // Cache decoded image objects across export frames; creating Image() on every
+  // frame prevents images from reliably becoming ready before the draw call.
+  const exportImageCache = new Map();
+
   function drawSceneToCanvas(ctx, t, W, H) {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, W, H);
@@ -2977,9 +2981,14 @@
         } else return;
       } else if (clip.type === 'image') {
         const asset = assetById(clip.assetId);
-        if (!asset || asset.missing) return;
-        const img = new Image();
-        img.src = asset.url;
+        if (!asset || asset.missing || !asset.url) return;
+        let img = exportImageCache.get(asset.id);
+        if (!img) {
+          img = new Image();
+          img.decoding = 'async';
+          img.src = asset.url;
+          exportImageCache.set(asset.id, img);
+        }
         if (!img.complete || !img.naturalWidth) return;
         source = img; sw = img.naturalWidth; sh = img.naturalHeight;
       }
@@ -3011,42 +3020,49 @@
       ctx.restore();
     };
 
-    const videoClip = activeHumanClipAt('video', t);
-    if (videoClip && !state.tracks.video.hidden) drawVisual(videoClip, true);
-    else if (videoClip === null) {
-      const overlayVideoClip = activeHumanClipAt('overlay', t);
-      if (overlayVideoClip && overlayVideoClip.type === 'video' && !state.tracks.overlay.hidden) drawVisual(overlayVideoClip);
+    // Render the active visual clip from any existing video-family track.
+    // The preview uses one media element, so the same resolved clip is drawn here.
+    const videoClip = activeHumanClipAtBaseType('video', t);
+    if (videoClip) {
+      const track = state.tracks[videoClip.trackType];
+      if (!track || (!track.hidden && track.exists)) drawVisual(videoClip, true);
+    } else {
+      const overlayVideoClip = activeHumanClipAtBaseType('overlay', t);
+      if (overlayVideoClip && overlayVideoClip.type === 'video') drawVisual(overlayVideoClip, true);
     }
 
-    // image overlays on the overlay track
-    if (!state.tracks.overlay.hidden) {
-      const imgClip = activeClipAt('overlay', t);
-      if (imgClip && imgClip.type === 'image') drawVisual(imgClip);
+    // Composite every active image overlay, including secondary overlay tracks.
+    for (const imageClip of state.clips) {
+      if (imageClip.type !== 'image' || getTrackBaseType(imageClip.trackType) !== 'overlay') continue;
+      const track = state.tracks[imageClip.trackType];
+      if (!track || !track.exists || track.hidden) continue;
+      if (t >= imageClip.start && t < imageClip.start + imageClip.duration) drawVisual(imageClip);
     }
 
-    // text overlays (keyframe-aware)
-    if (!state.tracks.text.hidden) {
-      const textClip = activeClipAt('text', t);
-      if (textClip) {
-        const p = textClip.props || {};
-        const ex = effectiveProp(textClip, 'x', t) || 0;
-        const ey = effectiveProp(textClip, 'y', t) || 0;
-        const esc = effectiveProp(textClip, 'scale', t) || 100;
-        const eop = effectiveProp(textClip, 'opacity', t);
-        const opacity = clamp((eop != null ? eop : 100) / 100, 0, 1) * fadeEnvelope(textClip, t);
-        ctx.save();
-        ctx.globalAlpha = opacity;
-        ctx.fillStyle = p.color || '#ffffff';
-        const fontSize = clamp(p.fontSize || 48, 8, 400) * (H / 1080) * clamp(esc / 100, 0.05, 10);
-        ctx.font = `600 ${fontSize}px ${FONT_STACK_RESOLVED || 'sans-serif'}`;
-        ctx.textAlign = p.align === 'left' ? 'left' : p.align === 'right' ? 'right' : 'center';
-        ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(0,0,0,.6)';
-        ctx.shadowBlur = 12;
-        const tx = p.align === 'left' ? W * 0.08 + ex * 0.05 / 100 * W : p.align === 'right' ? W * 0.92 + ex * 0.05 / 100 * W : W / 2 + ex * 0.05 / 100 * W;
-        ctx.fillText(p.content || '', tx, H / 2 + ey * 0.05 / 100 * H);
-        ctx.restore();
-      }
+    // Composite every active text clip instead of silently dropping all but the first.
+    for (const textClip of state.clips) {
+      if (textClip.type !== 'text' || getTrackBaseType(textClip.trackType) !== 'text') continue;
+      const track = state.tracks[textClip.trackType];
+      if (!track || !track.exists || track.hidden) continue;
+      if (t < textClip.start || t >= textClip.start + textClip.duration) continue;
+      const p = textClip.props || {};
+      const ex = effectiveProp(textClip, 'x', t) || 0;
+      const ey = effectiveProp(textClip, 'y', t) || 0;
+      const esc = effectiveProp(textClip, 'scale', t) || 100;
+      const eop = effectiveProp(textClip, 'opacity', t);
+      const opacity = clamp((eop != null ? eop : 100) / 100, 0, 1) * fadeEnvelope(textClip, t);
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = p.color || '#ffffff';
+      const fontSize = clamp(p.fontSize || 48, 8, 400) * (H / 1080) * clamp(esc / 100, 0.05, 10);
+      ctx.font = `600 ${fontSize}px ${FONT_STACK_RESOLVED || 'sans-serif'}`;
+      ctx.textAlign = p.align === 'left' ? 'left' : p.align === 'right' ? 'right' : 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,.6)';
+      ctx.shadowBlur = 12;
+      const tx = p.align === 'left' ? W * 0.08 + ex * 0.05 / 100 * W : p.align === 'right' ? W * 0.92 + ex * 0.05 / 100 * W : W / 2 + ex * 0.05 / 100 * W;
+      ctx.fillText(p.content || '', tx, H / 2 + ey * 0.05 / 100 * H);
+      ctx.restore();
     }
 
     // fade-to-black overlay across transitions (matches preview opacity behavior)
@@ -3112,6 +3128,7 @@
     
     exportState.running = true;
     exportState.canvas = canvas;
+    exportImageCache.clear();
     
     let recorder;
     try {
@@ -3193,7 +3210,10 @@
       exportState.stream.getTracks().forEach((t) => t.stop());
       exportState.stream = null;
     }
-    exportState.stream = null;
+    exportImageCache.clear();
+    exportState.canvas = null;
+    exportState.ctx = null;
+    exportState.recorder = null;
     state.playing = false;
     updatePlayPauseButton();
     setPlayheadTime(prevTime);
