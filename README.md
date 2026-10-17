@@ -27,39 +27,82 @@
 
 This is an **early development release**, not a production-ready editor. Development is ongoing, and some workflows may be incomplete or unreliable.
 
-## v1.0.9 update
+## Version and upgrade history
 
-- Added a prominent live-editor link at the top of the README and in the app toolbar: [cutora-ten.vercel.app](https://cutora-ten.vercel.app).
-- Reduced preview overhead by avoiding repeated overlay DOM rebuilds during playback and removing duplicate per-frame processing calls.
-- Improved phone and small-screen layouts with stacked editor panels, larger touch targets, a compact toolbar, and a scrollable timeline.
+The history below is reconstructed from the repository's commit messages, source comments, and documentation. Version labels without a dedicated release tag are identified as development refinements rather than confirmed published releases.
 
+### v1.0.9 — Playback, export, and mobile refinements
 
-- Fixed the Open Project toolbar button so it opens the project-file picker, matching the Ctrl+O shortcut.
-- Refreshed the interface with a violet/blue accent palette, clearer active states, and more colourful clip-type styling.
-- Added more visible hover and keyboard-focus feedback for common controls.
-- Kept the existing HTML/CSS/JavaScript architecture and the timeline/preview repair work from v1.0.4.
+- Improved track mute/lock state feedback and corrected mute handling for active tracks.
+- Added direct drag-to-reposition for preview text, with lock protection and undo support.
+- Improved text sizing relative to the preview frame.
+- Expanded export compositing for active image and text clips across secondary overlay/text tracks, and cached image objects between frames.
+- Throttled timeline UI updates during playback while retaining per-frame media synchronization.
+- Added a best-effort 120 FPS export option; actual output frame rate depends on browser, device, and recording performance.
+- Hardened small-screen layout, wrapping controls, and touch-scrollable timeline behavior.
+- Added the live editor link to the README and toolbar.
+- Documented remaining export limitations: audio mixing and complete multi-video-track compositing are not yet implemented.
 
-### v1.0.9 improvements
+### v1.0.8 — No separate release record found
 
-- Improved track mute and lock state handling, with clearer visual feedback for muted and locked tracks.
-- Added direct preview text repositioning and improved text-size scaling relative to the preview frame.
-- Improved export compositing for active image and text overlays across overlay/text tracks, and cached image objects between export frames.
-- Reduced playback timeline-UI update frequency while retaining per-animation-frame media synchronization.
-- Added a best-effort 120 FPS export option; actual capture frame rate depends on browser and device performance.
-- Hardened small-screen layout rules for preview sizing, wrapping controls, side panels, and touch-scrollable timelines.
+No dedicated v1.0.8 release note or release tag was identified in the inspected repository history. This README does not assign unverified features to a formal v1.0.8 release.
 
-## Previous v1.0.3 update
+### v1.0.7-era development refinements
 
-- Fixed preview source switching so new videos wait for their own metadata before seeking.
+- Added clearer visual states for muted and locked tracks.
+- Added draggable text overlays in the preview.
+- Improved preview text sizing and track interaction feedback.
+
+These changes are present in source history, but a separate v1.0.7 release tag was not confirmed.
+
+### v1.0.6 — Preview performance and responsive workspace
+
+- Reduced repeated preview-overlay DOM rebuilding during playback.
+- Removed duplicate per-frame rendering work to improve playback responsiveness.
+- Added a responsive mobile layout and larger, easier-to-use touch controls.
+- Added a prominent link to open the live editor.
+
+### v1.0.5 — Controls and visual polish
+
+- Fixed the Open Project toolbar button so it opens the project-file picker, matching Ctrl+O.
+- Refreshed interface accents, clip-type styling, active states, hover feedback, and keyboard-focus styling.
+
+### v1.0.4 — Preview initialization and media synchronization
+
+- Fixed preview initialization issues that could leave the monitor empty or stale.
+- Improved media preloading and synchronization when switching video sources.
+- Stabilized preview layers and still-image handling.
+- Improved hidden-track playback and preview empty-state behavior.
+
+### v1.0.3 — Preview and saved-track fixes
+
+- Waited for new video metadata before seeking after a source switch.
 - Added a dedicated still-image layer for images placed on the primary video track.
-- Stabilized preview-frame sizing and overlay stacking.
-- Made the empty-preview state depend on visible visual clips rather than audio-only timeline content.
-
-- Fixed transport-button state updates when timeline duration changes.
-- Improved hidden-track playback handling and animated overlay refresh cadence.
+- Stabilized preview-frame sizing, overlay stacking, and empty-preview logic.
+- Improved transport controls, hidden-track playback, and export media synchronization.
 - Restored secondary tracks and their clips when loading saved projects.
-- Improved export media playback synchronization and removed the invalid native-controls attribute.
 - Added document metadata and visible keyboard-focus styling.
+
+### v1.0.2 — No separate release record found
+
+No dedicated v1.0.2 release note or release tag was identified in the inspected repository history. The documented history moves from v1.0.1 to v1.0.3; this gap is kept explicit rather than inventing changes.
+
+### v1.0.1 — Core stability and accessibility
+
+- Improved playback and transport state synchronization when clips are added, moved, or removed.
+- Stabilized track rendering and restoration for secondary tracks.
+- Improved secondary-track ID validation and saved-project restoration.
+- Refined preview markup, metadata, and keyboard-focus/accessibility states.
+- Stabilized early playback and export workflows.
+
+### v1.0.0 — Initial development snapshot
+
+- Established the vanilla HTML, CSS, and JavaScript editor structure.
+- Introduced local media import, a multitrack timeline, preview playback, clip editing, text overlays, visual adjustments, transitions/keyframes, undo/redo, project JSON save/load, and experimental browser-based export.
+
+## Current release status
+
+CUTORA is currently documented as **v1.0.9**. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
 
 ## Features
 
@@ -127,7 +170,7 @@ CUTORA/
 
 ## Development status
 
-Version **1.0.9** includes targeted track-control, export-rendering, playback-performance, and mobile-layout improvements. It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
+Version **1.0.9** includes the improvements listed in [Version and upgrade history](#version-and-upgrade-history). It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
 
 Known limitations include:
 - Export does not yet mix audio tracks into the rendered file; audio mixing remains incomplete.
