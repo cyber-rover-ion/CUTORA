@@ -3386,6 +3386,52 @@
   // SECTION: Init
   // ======================================================================
 
+
+  // ======================================================================
+  // SECTION: Appearance presets
+  // ======================================================================
+  const APPEARANCE_KEY = 'cutora-appearance-v1';
+  const APPEARANCE_PRESETS = new Set(['midnight', 'ocean', 'emerald', 'sunset', 'ruby', 'amber', 'rose', 'arctic', 'cyber', 'mono']);
+
+  function applyAppearanceTheme(theme, persist = true) {
+    const selected = APPEARANCE_PRESETS.has(theme) ? theme : 'midnight';
+    document.documentElement.dataset.cutoraTheme = selected;
+    document.querySelectorAll('[data-theme-preset]').forEach((button) => {
+      const active = button.dataset.themePreset === selected;
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) {
+      const colors = { midnight:'#0b0d12', ocean:'#09151d', emerald:'#0b1712', sunset:'#1b1115', ruby:'#1a0d12', amber:'#19140b', rose:'#1a101b', arctic:'#10151d', cyber:'#100d1c', mono:'#111315' };
+      themeColor.setAttribute('content', colors[selected] || colors.midnight);
+    }
+    if (persist) {
+      try { window.localStorage.setItem(APPEARANCE_KEY, selected); } catch (err) { /* storage may be disabled */ }
+    }
+  }
+
+  function initAppearance() {
+    const openButton = document.getElementById('btn-appearance');
+    const dialog = document.getElementById('dialog-appearance');
+    const presets = document.getElementById('appearance-presets');
+    const reset = document.getElementById('appearance-reset');
+    if (openButton && dialog) openButton.addEventListener('click', () => openDialog(dialog));
+    if (presets) {
+      presets.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-theme-preset]');
+        if (!button || !presets.contains(button)) return;
+        applyAppearanceTheme(button.dataset.themePreset);
+      });
+    }
+    if (reset) reset.addEventListener('click', () => applyAppearanceTheme('midnight'));
+    let saved = 'midnight';
+    try {
+      const candidate = window.localStorage.getItem(APPEARANCE_KEY);
+      if (APPEARANCE_PRESETS.has(candidate)) saved = candidate;
+    } catch (err) { /* storage may be disabled */ }
+    applyAppearanceTheme(saved, false);
+  }
+
   function assertNoDuplicateListener() {
     try {
       const x = document.querySelectorAll('.editor-layout')[0];
@@ -3517,6 +3563,7 @@
     cacheTrackTemplates();
     initPanelTabs();
     initTopbar();
+    initAppearance();
     initImportControls();
     initSearchFilters();
     addTextPanelControl();
