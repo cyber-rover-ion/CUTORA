@@ -129,6 +129,18 @@
 
       <span aria-hidden="true" class="topbar-spacer"></span>
 
+      <button
+        id="btn-appearance" type="button" class="topbar-btn"
+        title="Customize appearance" aria-label="Customize appearance"
+        aria-haspopup="dialog" aria-controls="dialog-appearance"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3a9 9 0 1 0 0 18h1.2a2 2 0 0 0 1.4-3.4 1.8 1.8 0 0 1 1.3-3.1H18a3 3 0 0 0 3-3c0-4.7-4-8.5-9-8.5Z"/>
+          <circle cx="7.5" cy="10" r="1"/><circle cx="10" cy="6.8" r="1"/><circle cx="15" cy="7.5" r="1"/>
+        </svg>
+        <span>Theme</span>
+      </button>
+
       <a
         id="live-app-link"
         class="topbar-live-link"
@@ -1438,6 +1450,58 @@
   </footer>
 
   <!-- ===================== DIALOGS ===================== -->
+
+  <!-- Appearance theme picker -->
+  <div id="dialog-appearance" class="dialog overlay" role="dialog" aria-modal="true" aria-labelledby="dialog-appearance-title" aria-describedby="dialog-appearance-desc" hidden>
+    <div class="dialog-backdrop" data-dialog-close></div>
+    <div class="dialog-card dialog-card--wide appearance-dialog">
+      <header class="dialog-header">
+        <div><h2 id="dialog-appearance-title" class="dialog-title">Customize appearance</h2><p class="appearance-subtitle">Choose a color preset for the whole editor.</p></div>
+        <button type="button" class="dialog-close" data-dialog-close title="Close dialog" aria-label="Close appearance settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </header>
+      <div class="dialog-body">
+        <p id="dialog-appearance-desc" class="dialog-description appearance-description">Your selection is saved on this device and restored the next time you open CUTORA.</p>
+        <div id="appearance-presets" class="appearance-presets" role="group" aria-label="Color presets">
+          <button type="button" class="appearance-preset" data-theme-preset="midnight" aria-pressed="true">
+            <span class="appearance-swatch" style="--swatch-a:#9b8cff;--swatch-b:#d18bff;--swatch-c:#171a22"></span><span class="appearance-preset-name">Midnight</span><span class="appearance-preset-note">Violet · Default</span>
+          </button>
+          <button type="button" class="appearance-preset" data-theme-preset="ocean" aria-pressed="false">
+            <span class="appearance-swatch" style="--swatch-a:#38bdf8;--swatch-b:#2dd4bf;--swatch-c:#10202a"></span><span class="appearance-preset-name">Ocean</span><span class="appearance-preset-note">Blue · Teal</span>
+          </button>
+          <button type="button" class="appearance-preset" data-theme-preset="emerald" aria-pressed="false">
+            <span class="appearance-swatch" style="--swatch-a:#34d399;--swatch-b:#a3e635;--swatch-c:#12221d"></span><span class="appearance-preset-name">Emerald</span><span class="appearance-preset-note">Green · Lime</span>
+          </button>
+          <button type="button" class="appearance-preset" data-theme-preset="sunset" aria-pressed="false">
+            <span class="appearance-swatch" style="--swatch-a:#fb7185;--swatch-b:#fb923c;--swatch-c:#29171d"></span><span class="appearance-preset-name">Sunset</span><span class="appearance-preset-note">Rose · Orange</span>
+          </button>
+          <button type="button" class="appearance-preset" data-theme-preset="ruby" aria-pressed="false">
+            <span class="appearance-swatch" style="--swatch-a:#f43f5e;--swatch-b:#f87171;--swatch-c:#28151b"></span><span class="appearance-preset-name">Ruby</span><span class="appearance-preset-note">Red · Crimson</span>
+          </button>
+          <button type="button" class="appearance-preset" data-theme-preset="amber" aria-pressed="false">
+            <span class="appearance-swatch" style="--swatch-a:#fbbf24;--swatch-b:#fb923c;--swatch-c:#292114"></span><span class="appearance-preset-name">Amber</span><span class="appearance-preset-note">Gold · Warm</span>
+          </button>
+          <button type="button" class="appearance-preset" data-theme-preset="rose" aria-pressed="false">
+            <span class="appearance-swatch" style="--swatch-a:#f472b6;--swatch-b:#c084fc;--swatch-c:#291827"></span><span class="appearance-preset-name">Rose</span><span class="appearance-preset-note">Pink · Orchid</span>
+          </button>
+          <button type="button" class="appearance-preset" data-theme-preset="arctic" aria-pressed="false">
+            <span class="appearance-swatch" style="--swatch-a:#93c5fd;--swatch-b:#e2e8f0;--swatch-c:#17212c"></span><span class="appearance-preset-name">Arctic</span><span class="appearance-preset-note">Ice · Silver</span>
+          </button>
+          <button type="button" class="appearance-preset" data-theme-preset="cyber" aria-pressed="false">
+            <span class="appearance-swatch" style="--swatch-a:#22d3ee;--swatch-b:#e879f9;--swatch-c:#17152a"></span><span class="appearance-preset-name">Cyber</span><span class="appearance-preset-note">Neon · Electric</span>
+          </button>
+          <button type="button" class="appearance-preset" data-theme-preset="mono" aria-pressed="false">
+            <span class="appearance-swatch" style="--swatch-a:#e5e7eb;--swatch-b:#9ca3af;--swatch-c:#1c2026"></span><span class="appearance-preset-name">Monochrome</span><span class="appearance-preset-note">Slate · Neutral</span>
+          </button>
+        </div>
+      </div>
+      <footer class="dialog-footer">
+        <button type="button" id="appearance-reset" class="dialog-btn dialog-btn--secondary">Reset to Midnight</button>
+        <button type="button" class="dialog-btn dialog-btn--primary" data-dialog-close>Done</button>
+      </footer>
+    </div>
+  </div>
 
   <!-- New-project confirmation dialog -->
   <div
