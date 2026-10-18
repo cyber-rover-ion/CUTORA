@@ -170,6 +170,22 @@
     </div>
   </header>
 
+  <!-- Mobile section switcher: gives the editor a focused, app-like phone layout. -->
+  <nav id="mobile-navigation" class="mobile-navigation" aria-label="Mobile editor sections">
+    <button type="button" class="mobile-nav-item is-active" data-mobile-target="preview" aria-current="page">
+      <span class="mobile-nav-icon" aria-hidden="true">▶</span><span>Preview</span>
+    </button>
+    <button type="button" class="mobile-nav-item" data-mobile-target="media">
+      <span class="mobile-nav-icon" aria-hidden="true">▧</span><span>Media</span>
+    </button>
+    <button type="button" class="mobile-nav-item" data-mobile-target="properties">
+      <span class="mobile-nav-icon" aria-hidden="true">☷</span><span>Properties</span>
+    </button>
+    <button type="button" class="mobile-nav-item" data-mobile-target="timeline">
+      <span class="mobile-nav-icon" aria-hidden="true">▤</span><span>Timeline</span>
+    </button>
+  </nav>
+
   <!-- ===================== MAIN LAYOUT ===================== -->
   <main class="editor-layout">
 
