@@ -110,7 +110,7 @@ No dedicated v1.0.2 release note or release tag was identified in the inspected 
 
 ## Current release status
 
-CUTORA is currently documented as **v1.0.9**. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
+CUTORA is currently documented as **v1.1.3**. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
 
 ## Features
 
@@ -178,7 +178,7 @@ CUTORA/
 
 ## Development status
 
-Version **1.0.9** includes the improvements listed in [Version and upgrade history](#version-and-upgrade-history). It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
+Version **1.1.3** includes the stability and workspace fixes listed in [Version and upgrade history](#version-and-upgrade-history). It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
 
 Known limitations include:
 - Export does not yet mix audio tracks into the rendered file; audio mixing remains incomplete.
@@ -245,6 +245,7 @@ Created and maintained by **cyber-rover-ion**.
 ## v1.1.3 — Stability fixes
 
 - Prevented duplicate audio-library cards when refreshing or re-rendering imported media.
+- Scoped each search field to its own panel and added a useful no-results state.
 - Marked successful media imports as unsaved project changes so recovery can preserve them.
 - Added a clear guard against exporting an empty timeline.
 - Added bottom safe-area room on mobile so the floating navigation dock does not cover the final media cards or timeline content.
