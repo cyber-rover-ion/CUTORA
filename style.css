@@ -3140,6 +3140,17 @@ kbd {
     overscroll-behavior:contain;
     -webkit-overflow-scrolling:touch;
   }
+
+  /* Keep the floating dock from covering the last media cards or timeline lane. */
+  body[data-mobile-view="media"] .side-panel--left,
+  body[data-mobile-view="properties"] .side-panel--right {
+    padding-bottom:calc(86px + env(safe-area-inset-bottom));
+  }
+  body[data-mobile-view="preview"] #timeline .timeline-scroll,
+  body[data-mobile-view="timeline"] #timeline .timeline-scroll {
+    padding-bottom:calc(74px + env(safe-area-inset-bottom));
+    scroll-padding-bottom:calc(74px + env(safe-area-inset-bottom));
+  }
   body[data-mobile-view="timeline"] #timeline {
     display:flex !important;
     height:calc(100dvh - 150px);
