@@ -23,7 +23,7 @@
 
 ## About
 
-**CUTORA v1.1.3** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
+**CUTORA v1.1.4** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
 
 This is an **early development release**, not a production-ready editor. Development is ongoing, and some workflows may be incomplete or unreliable.
 
@@ -110,7 +110,7 @@ No dedicated v1.0.2 release note or release tag was identified in the inspected 
 
 ## Current release status
 
-CUTORA is currently documented as **v1.1.3**. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
+CUTORA is currently documented as **v1.1.4**. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
 
 ## Features
 
@@ -178,7 +178,7 @@ CUTORA/
 
 ## Development status
 
-Version **1.1.3** includes the stability and workspace fixes listed in [Version and upgrade history](#version-and-upgrade-history). It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
+Version **1.1.4** includes the stability and workspace fixes listed in [Version and upgrade history](#version-and-upgrade-history). It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
 
 Known limitations include:
 - Export does not yet mix audio tracks into the rendered file; audio mixing remains incomplete.
@@ -249,3 +249,13 @@ Created and maintained by **cyber-rover-ion**.
 - Marked successful media imports as unsaved project changes so recovery can preserve them.
 - Added a clear guard against exporting an empty timeline.
 - Added bottom safe-area room on mobile so the floating navigation dock does not cover the final media cards or timeline content.
+
+
+## v1.1.4 — Mobile editing refinement
+
+- Extended the compact workspace to tablet-sized portrait viewports and kept the JavaScript breakpoint aligned with CSS.
+- Kept project naming available on portrait mobile while prioritizing Save and Export in the horizontally scrollable action strip.
+- Reduced preview height on short screens, increased timeline lane usability, and added actual scrollable space below tracks so the floating navigation does not cover the final lane.
+- Improved landscape layout and touch targets for timeline controls.
+
+Mobile layouts have been statically validated; physical-device and end-to-end export tests are still required.
