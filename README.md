@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-64748b?style=flat-square" />
+  <img alt="Version" src="https://img.shields.io/badge/version-1.1.3-64748b?style=flat-square" />
   <img alt="Built with" src="https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JavaScript-f59e0b?style=flat-square" />
   <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" />
   <img alt="Status" src="https://img.shields.io/badge/status-early%20development-orange?style=flat-square" />
@@ -23,7 +23,7 @@
 
 ## About
 
-**CUTORA v1.1.2** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
+**CUTORA v1.1.3** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
 
 This is an **early development release**, not a production-ready editor. Development is ongoing, and some workflows may be incomplete or unreliable.
 
@@ -240,3 +240,11 @@ Created and maintained by **cyber-rover-ion**.
 - On phones, each workspace section opens independently to reduce scrolling and keep editing controls easy to reach.
 - Added safe-area spacing for phones with display cutouts and home-indicator areas, plus smaller-screen control sizing.
 - Desktop layout remains unchanged; mobile navigation automatically activates only at 720px and below.
+
+
+## v1.1.3 — Stability fixes
+
+- Prevented duplicate audio-library cards when refreshing or re-rendering imported media.
+- Marked successful media imports as unsaved project changes so recovery can preserve them.
+- Added a clear guard against exporting an empty timeline.
+- Added bottom safe-area room on mobile so the floating navigation dock does not cover the final media cards or timeline content.
