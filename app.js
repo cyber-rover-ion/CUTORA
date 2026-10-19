@@ -641,6 +641,7 @@
     renderMediaLibrary();
     renderAllClips();
     updatePreviewEmptyState();
+    if (imported > 0) markDirty();
 
     if (imported > 0) {
       const last = state.assets[state.assets.length - 1];
@@ -714,7 +715,8 @@
 
   function renderMediaLibrary() {
     if (!el.mediaLibrary) return;
-    el.mediaLibrary.querySelectorAll('.media-item').forEach((n) => n.remove());
+    // Audio assets are mirrored into a second library; clear every copy before rebuilding.
+    document.querySelectorAll('.media-library .media-item').forEach((n) => n.remove());
 
     const empty = el.mediaEmpty;
     if (state.assets.length === 0) {
@@ -3126,6 +3128,10 @@
   function startExport() {
     if (exportState.running) return;
     const duration = state.timelineDuration;
+    if (!state.clips.length || !Number.isFinite(duration) || duration <= 0) {
+      showToast('Add a clip to the timeline before exporting', 'error', 5000);
+      return;
+    }
     const [rw, rh] = (el.exportResolution ? el.exportResolution.value : '1920x1080').split('x').map((n) => parseInt(n, 10));
     const W = clamp(rw || 1920, 16, 4096);
     const H = clamp(rh || 1080, 16, 4096);
