@@ -721,6 +721,8 @@
     const empty = el.mediaEmpty;
     if (state.assets.length === 0) {
       if (empty) empty.hidden = false;
+      const audioEmpty = el.panelAudio ? el.panelAudio.querySelector('.media-empty') : null;
+      if (audioEmpty) audioEmpty.hidden = false;
       return;
     }
     if (empty) empty.hidden = true;
@@ -3297,16 +3299,31 @@
     document.querySelectorAll('.panel-search-input').forEach((input) => {
       input.addEventListener('input', () => {
         const query = input.value.trim().toLowerCase();
-        document.querySelectorAll('.media-library .media-item').forEach((item) => {
-          const lib = item.closest('.media-library');
-          // only filter within the media panel library
-          if (lib && lib.closest('.side-panel-content') === el.panelMedia) {
-            const asset = assetById(item.dataset.mediaId);
-            item.hidden = !!asset && query && !asset.name.toLowerCase().includes(query);
-          }
+        const panel = input.closest('.side-panel-content');
+        const library = panel ? panel.querySelector('.media-library') : null;
+        if (!panel || !library) return;
+
+        const items = Array.from(library.querySelectorAll('.media-item'));
+        let visibleCount = 0;
+        items.forEach((item) => {
+          const asset = assetById(item.dataset.mediaId);
+          const matches = !!asset && asset.name.toLowerCase().includes(query);
+          item.hidden = !matches;
+          if (matches) visibleCount++;
         });
-        const empty = el.panelMedia ? el.panelMedia.querySelector('.media-empty') : null;
-        if (empty) empty.hidden = state.assets.length === 0 ? false : !!query;
+
+        const empty = library.querySelector('.media-empty');
+        if (!empty) return;
+        const hasAssets = items.length > 0;
+        empty.hidden = hasAssets && (!query || visibleCount > 0);
+        if (panel === el.panelMedia) {
+          const title = empty.querySelector('.media-empty-title');
+          const subtitle = empty.querySelector('.media-empty-subtitle');
+          if (title) title.textContent = query && visibleCount === 0 ? 'No matching media' : 'No media imported';
+          if (subtitle) subtitle.textContent = query && visibleCount === 0
+            ? 'Try another file name or clear the search.'
+            : 'Click Import media to add clips, images, or audio.';
+        }
       });
     });
   }
