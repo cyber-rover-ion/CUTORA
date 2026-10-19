@@ -3590,7 +3590,7 @@
     items.forEach((item) => {
       item.addEventListener('click', () => applyView(item.dataset.mobileTarget));
     });
-    const mediaQuery = window.matchMedia('(max-width: 720px)');
+    const mediaQuery = window.matchMedia('(max-width: 820px)');
     if (mediaQuery.matches) applyView('preview');
     const handleViewportChange = (event) => {
       if (event.matches) applyView('preview');
