@@ -23,7 +23,7 @@
 
 ## About
 
-**CUTORA v1.1.1** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
+**CUTORA v1.1.2** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
 
 This is an **early development release**, not a production-ready editor. Development is ongoing, and some workflows may be incomplete or unreliable.
 
@@ -31,7 +31,7 @@ This is an **early development release**, not a production-ready editor. Develop
 
 The history below is reconstructed from the repository's commit messages, source comments, and documentation. Version labels without a dedicated release tag are identified as development refinements rather than confirmed published releases.
 
-### v1.1.1 — Customizable appearance
+### v1.1.2 — Customizable appearance
 
 - Added ten selectable color themes: Midnight, Ocean, Emerald, Sunset, Ruby, Amber, Rose, Arctic, Cyber, and Monochrome.
 - Added an Appearance picker in the editor toolbar with visual swatches and a clear selected-state indicator.
@@ -229,12 +229,12 @@ Created and maintained by **cyber-rover-ion**.
 ---
 
 <p align="center">
-  <strong>CUTORA v1.1.1</strong><br />
+  <strong>CUTORA v1.1.2</strong><br />
   An evolving experiment in browser-based video editing.
 </p>
 
 
-## v1.1.1 — Mobile workspace
+## v1.1.2 — Mobile workspace
 
 - Added a fixed, touch-friendly mobile navigation bar for Preview, Media, Properties, and Timeline.
 - On phones, each workspace section opens independently to reduce scrolling and keep editing controls easy to reach.
