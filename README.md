@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.1.3-64748b?style=flat-square" />
+  <img alt="Version" src="https://img.shields.io/badge/version-1.1.5-64748b?style=flat-square" />
   <img alt="Built with" src="https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JavaScript-f59e0b?style=flat-square" />
   <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" />
   <img alt="Status" src="https://img.shields.io/badge/status-early%20development-orange?style=flat-square" />
@@ -23,7 +23,7 @@
 
 ## About
 
-**CUTORA v1.1.4** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
+**CUTORA v1.1.5** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
 
 This is an **early development release**, not a production-ready editor. Development is ongoing, and some workflows may be incomplete or unreliable.
 
@@ -110,7 +110,7 @@ No dedicated v1.0.2 release note or release tag was identified in the inspected 
 
 ## Current release status
 
-CUTORA is currently documented as **v1.1.4**. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
+CUTORA is currently documented as **v1.1.5**. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
 
 ## Features
 
@@ -178,7 +178,7 @@ CUTORA/
 
 ## Development status
 
-Version **1.1.4** includes the stability and workspace fixes listed in [Version and upgrade history](#version-and-upgrade-history). It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
+Version **1.1.5** includes the stability and workspace fixes listed in [Version and upgrade history](#version-and-upgrade-history). It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
 
 Known limitations include:
 - Export does not yet mix audio tracks into the rendered file; audio mixing remains incomplete.
@@ -250,6 +250,13 @@ Created and maintained by **cyber-rover-ion**.
 - Added a clear guard against exporting an empty timeline.
 - Added bottom safe-area room on mobile so the floating navigation dock does not cover the final media cards or timeline content.
 
+
+## v1.1.5 — Timeline track recovery
+
+- Fixed deleted base tracks so the matching Video, Overlay, Text, or Audio add control reliably restores the track.
+- Added undo/redo history for track creation, removal, and restoration.
+- Prevented new secondary tracks from reusing IDs belonging to deleted tracks, preserving old clips and history.
+- Track removal keeps clips in project state; tracks with clips must be hidden before removal to avoid accidental loss.
 
 ## v1.1.4 — Mobile editing refinement
 
