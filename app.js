@@ -1372,11 +1372,12 @@
       return;
     }
 
-    // Keep media playback and animated overlays responsive at display refresh
-    // rate, while throttling timeline DOM updates to about 30 Hz.
-    syncPlaybackToPlayhead();
+    // Native video/audio playback runs at the browser's own cadence. Reconcile
+    // clip changes, overlay transforms and timeline chrome at a bounded 30 Hz
+    // instead of rescanning every clip on every 60/120 Hz animation frame.
     if (now - lastPlaybackUiUpdate >= PLAYBACK_UI_INTERVAL_MS) {
       lastPlaybackUiUpdate = now;
+      syncPlaybackToPlayhead();
       updateClipPlayheadPosition();
       updateTimeDisplay();
       updateSeekSlider();
