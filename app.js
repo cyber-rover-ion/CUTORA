@@ -2237,35 +2237,40 @@
   }
 
   function addNewTrack(type) {
-    // If base track was deleted, restore it
-    if (state.tracks[type] && !state.tracks[type].exists) {
-      state.tracks[type].exists = true;
-      state.tracks[type].hidden = false;
-      state.tracks[type].muted = false;
-      state.tracks[type].locked = false;
-      if (trackTemplates[type] && el.timelineTracks) {
-        const temp = document.createElement('div');
-        temp.innerHTML = trackTemplates[type];
-        const restored = temp.firstElementChild;
-        el.timelineTracks.appendChild(restored);
-        initTrackControlsForType(type);
-      }
-      syncTrackControls();
-      renderAllClips();
-      showToast(`${state.tracks[type].name} restored`);
+    if (!TRACK_TYPES.includes(type) || !trackTemplates[type] || !el.timelineTracks) {
+      showToast('This track type is not available', 'error');
       return;
     }
 
-    // Add secondary multi-track of this type
-    const existingCount = Object.keys(state.tracks).filter((k) => getTrackBaseType(k) === type && state.tracks[k].exists).length;
-    const nextIdx = existingCount + 1;
+    // Restore the original track instead of appending a possibly stale node.
+    // renderAllClips() owns DOM recovery for every existing track.
+    const baseTrack = state.tracks[type];
+    if (baseTrack && !baseTrack.exists) {
+      const before = snapshot();
+      baseTrack.exists = true;
+      baseTrack.hidden = false;
+      baseTrack.muted = false;
+      baseTrack.locked = false;
+      renderAllClips();
+      initTrackControlsForType(type);
+      syncTrackControls();
+      commitChange(before, 'track restored');
+      showToast(`${baseTrack.name} restored`, 'success');
+      return;
+    }
+
+    // Never reuse an ID belonging to a deleted secondary track; its clips and
+    // history still refer to that ID and must remain recoverable.
+    let nextIdx = 2;
+    while (Object.prototype.hasOwnProperty.call(state.tracks, `${type}-${nextIdx}`)) nextIdx++;
     const newId = `${type}-${nextIdx}`;
     const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
     const newName = `${typeLabel} ${nextIdx}`;
+    const before = snapshot();
 
     state.tracks[newId] = {
       id: newId,
-      type: type,
+      type,
       name: newName,
       hidden: false,
       muted: false,
@@ -2273,21 +2278,11 @@
       exists: true
     };
 
-    if (trackTemplates[type] && el.timelineTracks) {
-      const temp = document.createElement('div');
-      temp.innerHTML = trackTemplates[type];
-      const newTrackEl = temp.firstElementChild;
-      newTrackEl.id = `track-${newId}`;
-      newTrackEl.dataset.trackType = newId;
-      newTrackEl.dataset.trackIndex = String(nextIdx);
-      const nameEl = newTrackEl.querySelector('.track-name');
-      if (nameEl) nameEl.textContent = newName;
-      el.timelineTracks.appendChild(newTrackEl);
-      initTrackControlsForType(newId);
-    }
-    syncTrackControls();
     renderAllClips();
-    showToast(`${newName} added to timeline`);
+    initTrackControlsForType(newId);
+    syncTrackControls();
+    commitChange(before, 'track added');
+    showToast(`${newName} added to timeline`, 'success');
   }
 
   function toggleTrackFlag(trackId, flag) {
@@ -2338,15 +2333,24 @@
     if (!ts || !ts.exists) return;
     const hasClips = state.clips.some((c) => c.trackType === trackId);
     if (hasClips && !ts.hidden) {
-      showToast('Track has clips — move or delete them first, or toggle visibility', 'error');
+      showToast('Track has clips — hide it first to remove it without losing clips', 'error');
       return;
+    }
+
+    const before = snapshot();
+    ts.exists = false;
+    if (state.selectedClipId && state.clips.some((clip) => clip.id === state.selectedClipId && clip.trackType === trackId)) {
+      state.selectedClipId = null;
     }
     const track = getTrackElement(trackId);
     if (track) track.remove();
-    ts.exists = false;
-    renderAllClips();
     recomputeTimelineDuration();
-    showToast(`${ts.name} removed`);
+    renderAllClips();
+    syncSelectionUI();
+    refreshPropertiesPanel();
+    syncTrackControls();
+    commitChange(before, 'track removed');
+    showToast(`${ts.name} removed — use the + ${ts.type || getTrackBaseType(trackId)} button to restore it`);
   }
 
   // ======================================================================
