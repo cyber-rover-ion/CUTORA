@@ -2242,10 +2242,12 @@
       return;
     }
 
-    // Restore the original track instead of appending a possibly stale node.
-    // renderAllClips() owns DOM recovery for every existing track.
+    // The four named rows (Video, Overlay, Text, Audio) are primary tracks.
+    // Repair a missing primary row before creating any secondary track. This
+    // also handles DOM loss when state still incorrectly says exists=true.
     const baseTrack = state.tracks[type];
-    if (baseTrack && !baseTrack.exists) {
+    const primaryElement = byId(`track-${type}`);
+    if (baseTrack && (!baseTrack.exists || !primaryElement || !primaryElement.isConnected)) {
       const before = snapshot();
       baseTrack.exists = true;
       baseTrack.hidden = false;
@@ -2254,7 +2256,7 @@
       renderAllClips();
       initTrackControlsForType(type);
       syncTrackControls();
-      commitChange(before, 'track restored');
+      commitChange(before, 'primary track restored');
       showToast(`${baseTrack.name} restored`, 'success');
       return;
     }
