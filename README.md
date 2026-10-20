@@ -229,7 +229,7 @@ Created and maintained by **cyber-rover-ion**.
 ---
 
 <p align="center">
-  <strong>CUTORA v1.1.2</strong><br />
+  <strong>CUTORA v1.1.5</strong><br />
   An evolving experiment in browser-based video editing.
 </p>
 
