@@ -3513,3 +3513,25 @@ kbd {
   .side-panel--left { max-height: 34dvh; }
   .timeline { height: 38dvh; min-height: 190px; max-height: 42dvh; }
 }
+
+
+/* v1.1.6 — pointer-aware interaction for touch-first devices */
+@media (hover: none), (pointer: coarse) {
+  [data-input-mode="touch"] .topbar-btn:hover,
+  [data-input-mode="touch"] .playback-btn:hover,
+  [data-input-mode="touch"] .timeline-add-btn:hover,
+  [data-input-mode="touch"] .appearance-preset:hover,
+  [data-input-mode="touch"] .side-panel-tab:hover {
+    box-shadow: none;
+    filter: none;
+  }
+
+  [data-input-mode="touch"] .topbar-btn,
+  [data-input-mode="touch"] .playback-btn,
+  [data-input-mode="touch"] .timeline-add-btn,
+  [data-input-mode="touch"] .track-btn,
+  [data-input-mode="touch"] .side-panel-tab {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
