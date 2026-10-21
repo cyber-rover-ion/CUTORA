@@ -3150,13 +3150,46 @@
       ctx.globalAlpha = opacity;
       ctx.fillStyle = p.color || '#ffffff';
       const fontSize = clamp(p.fontSize || 48, 8, 400) * (H / 1080) * clamp(esc / 100, 0.05, 10);
-      ctx.font = `600 ${fontSize}px ${FONT_STACK_RESOLVED || 'sans-serif'}`;
+      const exportFonts = { system: 'Arial, sans-serif', arial: 'Arial, Helvetica, sans-serif', georgia: 'Georgia, serif', impact: 'Impact, sans-serif', mono: '"Courier New", monospace', serif: 'Georgia, "Times New Roman", serif', rounded: '"Trebuchet MS", Arial, sans-serif', condensed: '"Arial Narrow", Impact, sans-serif' };
+      ctx.font = `${p.fontFamily === 'impact' ? '900' : '700'} ${fontSize}px ${exportFonts[p.fontFamily] || FONT_STACK_RESOLVED || 'sans-serif'}`;
       ctx.textAlign = p.align === 'left' ? 'left' : p.align === 'right' ? 'right' : 'center';
       ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(0,0,0,.6)';
-      ctx.shadowBlur = 12;
+      const effect = p.textEffect || 'shadow';
       const tx = p.align === 'left' ? W * 0.08 + ex * 0.05 / 100 * W : p.align === 'right' ? W * 0.92 + ex * 0.05 / 100 * W : W / 2 + ex * 0.05 / 100 * W;
-      ctx.fillText(p.content || '', tx, H / 2 + ey * 0.05 / 100 * H);
+      const ty = H / 2 + ey * 0.05 / 100 * H;
+      if (effect === 'label') {
+        const metrics = ctx.measureText(p.content || '');
+        const padX = fontSize * .22, padY = fontSize * .12;
+        const width = metrics.width + padX * 2, height = fontSize * 1.35 + padY * 2;
+        const left = p.align === 'left' ? tx - padX : p.align === 'right' ? tx - width + padX : tx - width / 2;
+        ctx.fillStyle = 'rgba(0,0,0,.62)';
+        ctx.fillRect(left, ty - height / 2, width, height);
+        ctx.fillStyle = p.color || '#ffffff';
+      }
+      if (effect === 'outline') {
+        ctx.lineWidth = Math.max(1, fontSize * .045);
+        ctx.strokeStyle = 'rgba(0,0,0,.95)';
+        ctx.strokeText(p.content || '', tx, ty);
+      }
+      if (effect === 'neon') {
+        ctx.shadowColor = p.color || '#ffffff';
+        ctx.shadowBlur = Math.max(8, fontSize * .28);
+      } else if (effect === 'retro') {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255,80,100,.8)';
+        ctx.fillText(p.content || '', tx + fontSize * .035, ty + fontSize * .035);
+        ctx.fillStyle = 'rgba(70,190,255,.7)';
+        ctx.fillText(p.content || '', tx - fontSize * .025, ty - fontSize * .025);
+        ctx.fillStyle = p.color || '#ffffff';
+        ctx.shadowColor = 'transparent';
+      } else if (effect === 'shadow') {
+        ctx.shadowColor = 'rgba(0,0,0,.7)';
+        ctx.shadowBlur = Math.max(4, fontSize * .18);
+      } else {
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+      }
+      ctx.fillText(p.content || '', tx, ty);
       ctx.restore();
     }
 
