@@ -3316,3 +3316,200 @@ kbd {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* v1.1.6 — mobile-first touch and viewport refinement */
+@media (max-width: 720px) {
+  :root {
+    --topbar-h: 44px;
+    --timeline-h: 34dvh;
+    --track-header-w: 92px;
+    --track-h: 52px;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button, .media-item, .preset-card, .appearance-preset, .clip {
+    touch-action: manipulation;
+  }
+
+  button, input, select, textarea {
+    font-size: max(16px, 1em);
+  }
+
+  #topbar {
+    padding-top: max(6px, env(safe-area-inset-top, 0px));
+    gap: 6px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--bg-panel);
+  }
+
+  .topbar-actions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    justify-content: flex-start;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 1px 0 3px;
+  }
+  .topbar-actions::-webkit-scrollbar { display: none; }
+  .topbar-btn, .topbar-btn-primary {
+    flex: 0 0 40px;
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .topbar-btn-primary {
+    flex-basis: 72px;
+    width: 72px;
+    padding-inline: 9px;
+  }
+  .topbar-btn-primary span { display: inline; }
+  .topbar-live-link { flex: 0 0 auto; min-height: 40px; }
+  .topbar-github { flex: 0 0 40px; width: 40px; min-height: 40px; }
+
+  .preview-area { min-height: 0; }
+  .preview-stage { min-height: 0; padding: 6px; }
+  .cutora-frame { width: 100%; max-width: 100%; }
+  .preview-controls { padding: 8px; }
+  .playback-row { gap: 8px; }
+  .playback-btn, .fullscreen-btn, .volume-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .playback-row--secondary { padding-top: 2px; }
+
+  .side-panel--left {
+    min-height: 0;
+    max-height: min(42dvh, 360px);
+  }
+  .side-panel-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    padding-top: 4px;
+    background: var(--bg-panel);
+    -webkit-overflow-scrolling: touch;
+  }
+  .side-panel-tab {
+    min-height: 42px;
+    padding-inline: 13px;
+  }
+  .panel-header { padding: 12px; }
+  .panel-import-btn { min-height: 44px; }
+  .panel-search-input { min-height: 40px; }
+  .media-library {
+    gap: 8px;
+    padding: 9px;
+    grid-template-columns: repeat(auto-fill, minmax(min(120px, 42vw), 1fr));
+    -webkit-overflow-scrolling: touch;
+  }
+  .media-item { padding: 7px; }
+  .media-item .media-add-btn { min-height: 34px; padding-inline: 10px; }
+
+  .side-panel--right {
+    max-height: min(48dvh, 420px);
+    min-height: 0;
+  }
+  .side-panel--right .side-panel-content { overflow-y: auto; }
+
+  .timeline {
+    height: var(--timeline-h);
+    min-height: 250px;
+    max-height: 44dvh;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .timeline-top {
+    position: relative;
+    z-index: 7;
+    padding: 8px;
+    background: var(--bg-panel);
+  }
+  .timeline-controls { gap: 6px; }
+  .timeline-add-btn {
+    min-width: 40px;
+    min-height: 40px;
+    border-radius: 8px;
+  }
+  .track-header {
+    padding: 6px;
+    gap: 5px;
+  }
+  .track-btn {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+  }
+  .track-btn svg { width: 14px; height: 14px; }
+  .track-actions { gap: 2px; }
+  .clip {
+    min-width: 30px;
+    padding-inline: 8px;
+    touch-action: pan-y;
+  }
+  .timeline-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-width: auto;
+  }
+
+  .overlay {
+    align-items: flex-end;
+    padding: 8px 8px max(8px, env(safe-area-inset-bottom, 0px));
+  }
+  .dialog-card {
+    width: 100%;
+    max-width: 100%;
+    max-height: 88dvh;
+    border-radius: 16px 16px 12px 12px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--bg-panel);
+  }
+  .dialog-header, .dialog-body, .dialog-footer {
+    padding-inline: 14px;
+  }
+  .dialog-close, .dialog-btn { min-height: 42px; }
+  .export-options { grid-template-columns: minmax(0, 1fr); }
+  .export-select { min-height: 42px; }
+  .notifications {
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    width: calc(100vw - 24px);
+    max-width: 480px;
+  }
+  .toast {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (max-width: 420px) {
+  :root { --track-header-w: 84px; --track-h: 50px; }
+  .topbar-title { letter-spacing: .1em; }
+  .topbar-center { order: 4; }
+  .topbar-project-name { height: 40px; text-align: left; }
+  .preview-controls { gap: 5px; }
+  .time-display { min-width: 38px; }
+  .track-name { font-size: 10px; }
+  .timeline-info { flex-wrap: nowrap; }
+  .timeline-add-tracks { gap: 4px; }
+  .dialog-body { overscroll-behavior: contain; }
+}
+
+@media (max-width: 720px) and (orientation: landscape) {
+  .preview-area { min-height: 0; }
+  .preview-stage { min-height: 0; }
+  .cutora-frame { width: auto; height: min(52dvh, 320px); }
+  .side-panel--left { max-height: 34dvh; }
+  .timeline { height: 38dvh; min-height: 190px; max-height: 42dvh; }
+}
