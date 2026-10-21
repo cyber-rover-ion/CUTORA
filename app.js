@@ -3321,6 +3321,7 @@
     
     const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
     const chunks = [];
+    let exportFailed = false;
     recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
     
     const prevTime = state.currentTime;
@@ -3335,6 +3336,11 @@
     syncPlaybackToPlayhead();
     
     recorder.onstop = () => {
+      if (exportFailed) {
+        cleanupExport(prevTime, wasPlaying, false);
+        setPlayheadTime(prevTime);
+        return;
+      }
       try {
         const blob = new Blob(chunks, { type: mimeType });
         const url = URL.createObjectURL(blob);
@@ -3355,8 +3361,9 @@
       setPlayheadTime(prevTime);
     };
     recorder.onerror = (e) => {
+      exportFailed = true;
       progress.finish(`Export error: ${e.error && e.error.name ? e.error.name : 'recorder failure'}`, 'error');
-      cleanupExport(prevTime, wasPlaying);
+      cleanupExport(prevTime, wasPlaying, false);
       state.currentTime = prevTime;
       setPlayheadTime(prevTime);
     };
@@ -3382,14 +3389,35 @@
         try { recorder.stop(); } catch (err) { cleanupExport(prevTime, wasPlaying); }
         return;
       }
-      syncPlaybackToPlayhead();
-      updateClipPlayheadPosition();
-      drawSceneToCanvas(ctx, state.currentTime, W, H);
-      progress.update(`Exporting ${Math.round((state.currentTime / duration) * 100)}% — renders the video/overlay tracks in real time`);
-      exportState.raf = requestAnimationFrame(step);
+      try {
+        syncPlaybackToPlayhead();
+        updateClipPlayheadPosition();
+        drawSceneToCanvas(ctx, state.currentTime, W, H);
+        progress.update(`Exporting ${Math.round((state.currentTime / duration) * 100)}% — renders the video/overlay tracks in real time`);
+        exportState.raf = requestAnimationFrame(step);
+      } catch (err) {
+        exportFailed = true;
+        progress.finish('Export stopped because a frame could not be rendered', 'error');
+        try { if (recorder.state !== 'inactive') recorder.stop(); }
+        catch (stopError) {
+          cleanupExport(prevTime, wasPlaying, false);
+          setPlayheadTime(prevTime);
+        }
+      }
     };
-    drawSceneToCanvas(ctx, 0, W, H);
-    exportState.raf = requestAnimationFrame(step);
+    try {
+      drawSceneToCanvas(ctx, 0, W, H);
+      exportState.raf = requestAnimationFrame(step);
+    } catch (err) {
+      exportFailed = true;
+      progress.finish('Export could not render the first frame', 'error');
+      try { if (recorder.state !== 'inactive') recorder.stop(); }
+      catch (stopError) {
+        cleanupExport(prevTime, wasPlaying, false);
+        setPlayheadTime(prevTime);
+      }
+      return;
+    }
     showToast('Export started — playback runs in real time; keep this tab visible', 'info', 5000);
   }
 
