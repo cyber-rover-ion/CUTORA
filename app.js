@@ -2151,7 +2151,10 @@
           vintage: { brightness: 4, contrast: -8, saturation: -28, temperature: 34, grayscale: 0, blur: 0 },
           cool: { brightness: 2, contrast: 8, saturation: 5, temperature: -45, grayscale: 0, blur: 0 },
           dreamy: { brightness: 8, contrast: -18, saturation: 12, temperature: 12, grayscale: 0, blur: 1.5 },
-          noir: { brightness: -8, contrast: 48, saturation: -100, temperature: 0, grayscale: 100, blur: 0 }
+          noir: { brightness: -8, contrast: 48, saturation: -100, temperature: 0, grayscale: 100, blur: 0 },
+          warm: { brightness: 3, contrast: 12, saturation: 18, temperature: 48, grayscale: 0, blur: 0 },
+          faded: { brightness: 7, contrast: -22, saturation: -24, temperature: 10, grayscale: 0, blur: 0 },
+          bright: { brightness: 12, contrast: 6, saturation: 8, temperature: 0, grayscale: 0, blur: 0 }
         };
         const before = snapshot();
         const look = el.adjVideoLook.value || 'none';
@@ -2889,21 +2892,44 @@
 
   function isValidProject(data) {
     try {
-      return !!data
-        && data.app === 'CUTORA'
-        && typeof data.name === 'string'
-        && Array.isArray(data.clips)
-        && Array.isArray(data.assets)
-        && data.clips.length + data.assets.length <= 5000
-        && data.clips.every((c) => {
-          if (!c || typeof c.id !== 'string' || typeof c.start !== 'number' || typeof c.duration !== 'number') return false;
-          if (!isFinite(c.start) || !isFinite(c.duration) || c.start < 0 || c.duration <= 0) return false;
-          if (c.trackType && !/^(video|overlay|text|audio)(-\d+)?$/.test(c.trackType)) return false;
-          if (c.trackType && data.tracks && !Object.prototype.hasOwnProperty.call(data.tracks, c.trackType)
-            && !TRACK_TYPES.includes(c.trackType)) return false;
-          return true;
-        })
-        && (data.assets.every((a) => a && typeof a.name === 'string' && ['video', 'audio', 'image'].includes(a.type)));
+      if (!data || data.app !== 'CUTORA' || typeof data.name !== 'string') return false;
+      if (!Array.isArray(data.clips) || !Array.isArray(data.assets)) return false;
+      if (data.clips.length + data.assets.length > 5000) return false;
+      if (data.tracks != null && (typeof data.tracks !== 'object' || Array.isArray(data.tracks))) return false;
+
+      const assetIds = new Set();
+      for (const asset of data.assets) {
+        if (!asset || typeof asset.id !== 'string' || !asset.id
+          || typeof asset.name !== 'string'
+          || !['video', 'audio', 'image'].includes(asset.type)) return false;
+        if (assetIds.has(asset.id)) return false;
+        assetIds.add(asset.id);
+        if (asset.duration != null && (!Number.isFinite(asset.duration) || asset.duration < 0)) return false;
+      }
+
+      const clipIds = new Set();
+      for (const clip of data.clips) {
+        if (!clip || typeof clip.id !== 'string' || !clip.id
+          || !['video', 'audio', 'image', 'text'].includes(clip.type)
+          || typeof clip.start !== 'number' || typeof clip.duration !== 'number'
+          || !Number.isFinite(clip.start) || !Number.isFinite(clip.duration)
+          || clip.start < 0 || clip.duration <= 0) return false;
+        if (clipIds.has(clip.id)) return false;
+        clipIds.add(clip.id);
+        if (clip.inPoint != null && (!Number.isFinite(clip.inPoint) || clip.inPoint < 0)) return false;
+        if (clip.assetId != null && typeof clip.assetId !== 'string') return false;
+        if (clip.props != null && (typeof clip.props !== 'object' || Array.isArray(clip.props))) return false;
+        if (clip.trackType && (typeof clip.trackType !== 'string' || !/^(video|overlay|text|audio)(-\d+)?$/.test(clip.trackType))) return false;
+        if (clip.trackType && data.tracks && !Object.prototype.hasOwnProperty.call(data.tracks, clip.trackType)
+          && !TRACK_TYPES.includes(clip.trackType)) return false;
+      }
+      if (data.tracks) {
+        for (const [trackId, track] of Object.entries(data.tracks)) {
+          if (!/^(video|overlay|text|audio)(-\d+)?$/.test(trackId)
+            || !track || typeof track !== 'object' || Array.isArray(track)) return false;
+        }
+      }
+      return true;
     } catch (err) {
       return false;
     }
