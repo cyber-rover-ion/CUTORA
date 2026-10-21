@@ -3535,3 +3535,8 @@ kbd {
     user-select: none;
   }
 }
+
+
+/* v1.1.7 — richer editor controls */
+.properties-adjust-field--full { grid-column: 1 / -1; }
+#adj-text-font-family, #adj-text-effect, #adj-video-look { min-width: 0; width: 100%; }
