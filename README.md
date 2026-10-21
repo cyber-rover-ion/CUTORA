@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.1.7-64748b?style=flat-square" />
+  <img alt="Version" src="https://img.shields.io/badge/version-1.1.8-64748b?style=flat-square" />
   <img alt="Built with" src="https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JavaScript-f59e0b?style=flat-square" />
   <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" />
   <img alt="Status" src="https://img.shields.io/badge/status-early%20development-orange?style=flat-square" />
@@ -23,7 +23,7 @@
 
 ## About
 
-**CUTORA v1.1.7** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
+**CUTORA v1.1.8** is an experimental development snapshot of an experimental, desktop-style video editor for the web. The project explores how media management, timeline editing, preview controls, and project persistence can be built with standard browser APIs—without a frontend framework.
 
 This is an **early development release**, not a production-ready editor. Development is ongoing, and some workflows may be incomplete or unreliable.
 
@@ -110,7 +110,7 @@ No dedicated v1.0.2 release note or release tag was identified in the inspected 
 
 ## Current release status
 
-CUTORA is currently documented as **v1.1.7**. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
+CUTORA is currently documented as **v1.1.8**. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
 
 ## Features
 
@@ -178,7 +178,7 @@ CUTORA/
 
 ## Development status
 
-Version **1.1.7** includes the stability and workspace fixes listed in [Version and upgrade history](#version-and-upgrade-history). It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
+Version **1.1.8** includes the stability and workspace fixes listed in [Version and upgrade history](#version-and-upgrade-history). It remains an experimental editor; browser-level testing is still needed before treating these workflows as reliable.
 
 Known limitations include:
 - Export does not yet mix audio tracks into the rendered file; audio mixing remains incomplete.
@@ -229,7 +229,7 @@ Created and maintained by **cyber-rover-ion**.
 ---
 
 <p align="center">
-  <strong>CUTORA v1.1.7</strong><br />
+  <strong>CUTORA v1.1.8</strong><br />
   An evolving experiment in browser-based video editing.
 </p>
 
@@ -286,3 +286,12 @@ These are responsive CSS refinements. Physical-device testing is still required;
 - Added video looks: Cinematic, Vivid, Black & white, Vintage, Cool tone, Dreamy soft, and High-contrast noir, with an Original reset.
 - Text styling is applied in the preview and canvas export renderer. Video looks use the existing filter pipeline for supported export paths.
 - End-to-end playback and export still require validation with real media in supported browsers.
+
+
+## v1.1.8 — Stability and extra looks
+
+- Added Warm film, Faded matte, and Bright & clean video looks.
+- Hardened project-file validation against duplicate IDs, malformed clip properties, invalid media types, and malformed track records before loading.
+- Hardened media import so unexpected per-file failures do not abort the rest of a batch, and failed object URLs are released.
+- Added export animation-frame tracking and cleanup, paused preview media during cleanup, and guarded recorder startup and frame-render failures to prevent a broken export loop from running indefinitely.
+- These are code-level guards; end-to-end import, recovery, playback, and export still need browser testing with real media.
