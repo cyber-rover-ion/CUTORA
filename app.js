@@ -180,7 +180,7 @@
 
   function defaultProps(type) {
     if (type === 'text') {
-      return { opacity: 100, x: 0, y: 0, scale: 100, rotation: 0, content: 'Your text', fontSize: 48, color: '#ffffff', align: 'center', keyframes: {} };
+      return { opacity: 100, x: 0, y: 0, scale: 100, rotation: 0, content: 'Your text', fontSize: 48, color: '#ffffff', align: 'center', fontFamily: 'system', textEffect: 'shadow', keyframes: {} };
     }
     if (type === 'audio') {
       return { volume: 100, fadeIn: 0, fadeOut: 0, speed: 1, keyframes: {} };
@@ -191,7 +191,7 @@
       speed: 1,
       fadeIn: 0, fadeOut: 0,
       brightness: 0, contrast: 0, saturation: 0, temperature: 0,
-      grayscale: 0, blur: 0,
+      grayscale: 0, blur: 0, lookPreset: 'none',
       transition: { type: 'none', duration: 0 },
       keyframes: {}
     };
@@ -1774,10 +1774,17 @@
           // Match the 1080p-relative typography scale used by the export renderer.
           const frameHeight = el.previewOverlay.clientHeight || 1080;
           span.style.fontSize = `${clamp(p.fontSize || 48, 8, 400) * frameHeight / 1080}px`;
-          span.style.fontWeight = '600';
-          span.style.fontFamily = 'var(--font-stack)';
-          span.style.textShadow = '0 2px 8px rgba(0,0,0,.55)';
+          const fontFamilies = { system: 'Inter, system-ui, sans-serif', arial: 'Arial, Helvetica, sans-serif', georgia: 'Georgia, serif', impact: 'Impact, Haettenschweiler, sans-serif', mono: 'Courier New, monospace', serif: 'Georgia, Times New Roman, serif', rounded: 'Trebuchet MS, Arial Rounded MT Bold, sans-serif', condensed: 'Arial Narrow, Roboto Condensed, Impact, sans-serif' };
+          span.style.fontFamily = fontFamilies[p.fontFamily] || fontFamilies.system;
+          span.style.fontWeight = p.fontFamily === 'impact' ? '900' : '700';
+          span.style.letterSpacing = p.textEffect === 'retro' ? '.04em' : 'normal';
           span.style.textAlign = p.align || 'center';
+          span.style.padding = p.textEffect === 'label' ? '.18em .42em' : '0';
+          span.style.borderRadius = p.textEffect === 'label' ? '.22em' : '0';
+          span.style.background = p.textEffect === 'label' ? 'rgba(0,0,0,.62)' : 'transparent';
+          span.style.webkitTextStroke = p.textEffect === 'outline' ? '1.5px rgba(0,0,0,.95)' : '0 transparent';
+          const textShadows = { none: 'none', shadow: '0 2px 8px rgba(0,0,0,.65)', outline: '0 2px 4px rgba(0,0,0,.8)', neon: `0 0 5px ${p.color || '#fff'}, 0 0 14px ${p.color || '#fff'}, 0 0 28px ${p.color || '#fff'}`, label: 'none', retro: '3px 3px 0 rgba(255,80,100,.8), -2px -2px 0 rgba(70,190,255,.65)' };
+          span.style.textShadow = textShadows[p.textEffect || 'shadow'] || textShadows.shadow;
         }
       }
       const ex = effectiveProp(clip, 'x', t) || 0;
@@ -2023,6 +2030,9 @@
 
     set(el.adjTextContent, p.content || '');
     set(el.adjTextFontSize, clamp(p.fontSize || 48, 8, 400));
+    if (el.adjTextFontFamily) el.adjTextFontFamily.value = p.fontFamily || 'system';
+    if (el.adjTextEffect) el.adjTextEffect.value = p.textEffect || 'shadow';
+    if (el.adjVideoLook) el.adjVideoLook.value = p.lookPreset || 'none';
     const color = p.color || '#ffffff';
     set(el.adjTextColor, color);
     set(el.adjTextColorValue, color.toUpperCase());
@@ -2101,6 +2111,44 @@
       clip.props.content = node.value;
     });
     bindPropInput(el.adjTextFontSize, numericUpdater('fontSize', { min: 8, max: 400 }));
+    const bindTextChoice = (node, prop) => {
+      if (!node) return;
+      node.addEventListener('change', () => {
+        const clip = selectedClip();
+        if (!clip || clip.type !== 'text') return;
+        const before = snapshot();
+        clip.props[prop] = node.value;
+        renderOverlaysForTime();
+        commitChange(before, prop + ' changed');
+        markDirty();
+      });
+    };
+    bindTextChoice(el.adjTextFontFamily, 'fontFamily');
+    bindTextChoice(el.adjTextEffect, 'textEffect');
+    if (el.adjVideoLook) {
+      el.adjVideoLook.addEventListener('change', () => {
+        const clip = selectedClip();
+        if (!clip || (clip.type !== 'video' && clip.type !== 'image')) return;
+        const presets = {
+          none: { brightness: 0, contrast: 0, saturation: 0, temperature: 0, grayscale: 0, blur: 0 },
+          cinematic: { brightness: -4, contrast: 22, saturation: -18, temperature: 8, grayscale: 0, blur: 0 },
+          vivid: { brightness: 5, contrast: 12, saturation: 42, temperature: 0, grayscale: 0, blur: 0 },
+          mono: { brightness: 0, contrast: 16, saturation: -100, temperature: 0, grayscale: 100, blur: 0 },
+          vintage: { brightness: 4, contrast: -8, saturation: -28, temperature: 34, grayscale: 0, blur: 0 },
+          cool: { brightness: 2, contrast: 8, saturation: 5, temperature: -45, grayscale: 0, blur: 0 },
+          dreamy: { brightness: 8, contrast: -18, saturation: 12, temperature: 12, grayscale: 0, blur: 1.5 },
+          noir: { brightness: -8, contrast: 48, saturation: -100, temperature: 0, grayscale: 100, blur: 0 }
+        };
+        const before = snapshot();
+        const look = el.adjVideoLook.value || 'none';
+        Object.assign(clip.props, presets[look] || presets.none, { lookPreset: look });
+        refreshPropertiesPanel();
+        applyActiveClipProcessing();
+        renderOverlaysForTime();
+        commitChange(before, 'video look changed');
+        markDirty();
+      });
+    }
     if (el.adjTextAlign) {
       el.adjTextAlign.addEventListener('change', () => {
         const clip = selectedClip();
@@ -3576,6 +3624,9 @@
     el.adjTextColor = byId('adj-text-color');
     el.adjTextColorValue = byId('adj-text-color-value');
     el.adjTextAlign = byId('adj-text-align');
+    el.adjTextFontFamily = byId('adj-text-font-family');
+    el.adjTextEffect = byId('adj-text-effect');
+    el.adjVideoLook = byId('adj-video-look');
 
     // Dialogs
     el.dialogNewProject = byId('dialog-new-project');
