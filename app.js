@@ -27,6 +27,19 @@
 
   const el = {};
 
+  // Keep input-mode information available to CSS without user-agent sniffing.
+  // Coarse pointers cover phones/tablets; hybrid devices can still switch modes.
+  const coarsePointerQuery = window.matchMedia('(pointer: coarse)');
+  function syncInputMode() {
+    document.documentElement.dataset.inputMode = coarsePointerQuery.matches ? 'touch' : 'precise';
+  }
+  syncInputMode();
+  if (typeof coarsePointerQuery.addEventListener === 'function') {
+    coarsePointerQuery.addEventListener('change', syncInputMode);
+  } else if (typeof coarsePointerQuery.addListener === 'function') {
+    coarsePointerQuery.addListener(syncInputMode);
+  }
+
   function byId(id) {
     return document.getElementById(id);
   }
