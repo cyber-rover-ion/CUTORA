@@ -637,6 +637,7 @@
 
     let imported = 0;
     let rejected = 0;
+    let failed = 0;
 
     for (const file of files) {
       if (fileIsEmpty(file)) { rejected++; continue; }
@@ -645,23 +646,36 @@
         rejected++;
         continue;
       }
-      const url = URL.createObjectURL(file);
-      const asset = await probeAsset(file, type, url);
-      state.assets.push(asset);
-      imported++;
+      let url = null;
+      try {
+        url = URL.createObjectURL(file);
+        const asset = await probeAsset(file, type, url);
+        state.assets.push(asset);
+        imported++;
+      } catch (err) {
+        failed++;
+        if (url) {
+          try { URL.revokeObjectURL(url); } catch (revokeError) { /* noop */ }
+        }
+      }
     }
-    rebuildMissingLinks();
-    renderMediaLibrary();
-    renderAllClips();
-    updatePreviewEmptyState();
-    if (imported > 0) markDirty();
+    if (imported > 0) {
+      rebuildMissingLinks();
+      renderMediaLibrary();
+      renderAllClips();
+      updatePreviewEmptyState();
+      markDirty();
+      scheduleRecoverySave();
+    }
 
     if (imported > 0) {
-      const last = state.assets[state.assets.length - 1];
-      showToast(imported === 1 ? `Imported: ${last ? last.name : 'file'}` : `Imported ${imported} file${imported > 1 ? 's' : ''}`, 'success');
+      showToast(imported === 1 ? `Imported: ${state.assets[state.assets.length - 1]?.name || 'file'}` : `Imported ${imported} files`, 'success');
     }
     if (rejected > 0) {
-      showToast(`${rejected} unsupported file${rejected > 1 ? 's were' : ' was'} skipped (video, audio or image only)`, 'error');
+      showToast(`${rejected} unsupported or empty file${rejected > 1 ? 's were' : ' was'} skipped (video, audio or image only)`, 'error');
+    }
+    if (failed > 0) {
+      showToast(`Could not import ${failed} file${failed > 1 ? 's' : ''}. Try a supported media format.`, 'error', 5000);
     }
   }
 
@@ -3321,7 +3335,15 @@
       setPlayheadTime(prevTime);
     };
 
-    recorder.start(1000);
+    try {
+      recorder.start(1000);
+    } catch (err) {
+      progress.finish('Export could not start recording', 'error');
+      cleanupExport(prevTime, wasPlaying, false);
+      setPlayheadTime(prevTime);
+      showToast(`Export failed to start: ${err.message || 'recording error'}`, 'error', 6000);
+      return;
+    }
 
     // Real-time playback drives both the preview and the export canvas.
     let last = performance.now();
@@ -3338,15 +3360,21 @@
       updateClipPlayheadPosition();
       drawSceneToCanvas(ctx, state.currentTime, W, H);
       progress.update(`Exporting ${Math.round((state.currentTime / duration) * 100)}% — renders the video/overlay tracks in real time`);
-      requestAnimationFrame(step);
+      exportState.raf = requestAnimationFrame(step);
     };
     drawSceneToCanvas(ctx, 0, W, H);
-    requestAnimationFrame(step);
+    exportState.raf = requestAnimationFrame(step);
     showToast('Export started — playback runs in real time; keep this tab visible', 'info', 5000);
   }
 
-  function cleanupExport(prevTime, wasPlaying) {
+  function cleanupExport(prevTime, wasPlaying, showLimitNote = true) {
     exportState.running = false;
+    if (exportState.raf) {
+      cancelAnimationFrame(exportState.raf);
+      exportState.raf = 0;
+    }
+    if (el.previewVideo && !el.previewVideo.paused) el.previewVideo.pause();
+    if (el.previewAudio && !el.previewAudio.paused) el.previewAudio.pause();
     if (exportState.stream) {
       exportState.stream.getTracks().forEach((t) => t.stop());
       exportState.stream = null;
@@ -3358,7 +3386,9 @@
     state.playing = false;
     updatePlayPauseButton();
     setPlayheadTime(prevTime);
-    showToast('Note: export renders base video/image/text layers; audio mixing and multi-layer video overlays are not part of the export', 'info', 7000);
+    if (showLimitNote) {
+      showToast('Note: export renders base video/image/text layers; audio mixing and multi-layer video overlays are not part of the export', 'info', 7000);
+    }
   }
 
   // ======================================================================
