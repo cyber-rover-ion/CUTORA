@@ -174,8 +174,20 @@
     updateSeekSlider();
   }
 
+  function updateProjectStatus() {
+    if (!el.projectSaveStatus) return;
+    const dirty = !!state.dirty;
+    el.projectSaveStatus.textContent = dirty ? 'Unsaved changes' : 'All changes saved';
+    el.projectSaveStatus.classList.toggle('is-dirty', dirty);
+    el.projectSaveStatus.classList.toggle('is-saved', !dirty);
+    el.projectSaveStatus.setAttribute('aria-label', dirty
+      ? 'Project has unsaved changes'
+      : 'Project has no unsaved changes');
+  }
+
   function markDirty() {
     state.dirty = true;
+    updateProjectStatus();
   }
 
   function defaultProps(type) {
@@ -2729,6 +2741,7 @@
     state.dirty = false;
     state.projectName = 'Untitled Project';
     if (el.projectName) el.projectName.value = state.projectName;
+    updateProjectStatus();
     try { if (window.localStorage) window.localStorage.removeItem(RECOVERY_KEY); } catch (err) { /* noop */ }
 
     // Restore all four track shells
@@ -2859,6 +2872,7 @@
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
       state.dirty = false;
+      updateProjectStatus();
       try { if (window.localStorage) window.localStorage.removeItem(RECOVERY_KEY); } catch (err) { /* noop */ }
       showToast('Project saved as JSON (media files are not embedded — re-import them after reopening)', 'success', 6000);
     } catch (err) {
@@ -2993,6 +3007,7 @@
     state.undoStack = [];
     state.redoStack = [];
     state.dirty = true;
+    updateProjectStatus();
 
     // Rebuild missing track shells
     for (const type of TRACK_TYPES) {
@@ -3561,6 +3576,7 @@
         const v = el.projectName.value.trim();
         state.projectName = v || 'Untitled Project';
         markDirty();
+        scheduleRecoverySave();
       });
     }
     if (el.btnPlayPause) el.btnPlayPause.addEventListener('click', togglePlayPause);
@@ -3652,6 +3668,7 @@
     // Topbar
     el.topbar = byId('topbar');
     el.projectName = byId('project-name');
+    el.projectSaveStatus = byId('project-save-status');
     el.btnNewProject = byId('btn-new-project');
     el.btnUndo = byId('btn-undo');
     el.btnRedo = byId('btn-redo');
@@ -3844,9 +3861,13 @@
       }
     });
 
-    window.addEventListener('beforeunload', () => {
+    window.addEventListener('beforeunload', (event) => {
       cancelAnimationFrame(rafId);
       scheduleRecoverySave();
+      if (state.dirty) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
     });
     window.addEventListener('resize', debounce(() => renderAllClips(), 200));
 
@@ -3861,6 +3882,7 @@
     updateTimeDisplay();
     updateSeekSlider();
     syncTrackControls();
+    updateProjectStatus();
   }
 
   if (document.readyState === 'loading') {
