@@ -110,7 +110,7 @@ No dedicated v1.0.2 release note or release tag was identified in the inspected 
 
 ## Current release status
 
-CUTORA is currently documented as **v1.1.8**. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
+CUTORA is currently documented as **v1.1.8**. The editor toolbar now shows whether the current project has unsaved changes, and navigating away with unsaved work triggers the browser's leave-page warning. Editing the project name also updates the lightweight recovery snapshot. These safeguards do not embed local media in project files or recovery data. It remains an experimental editor; the version history describes implemented development work, not a guarantee that every workflow has passed end-to-end browser testing.
 
 ## Features
 
